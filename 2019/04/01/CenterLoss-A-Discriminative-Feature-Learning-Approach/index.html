@@ -6,15 +6,31 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Archives | Hexo</title>
+  <title>论文阅读 - CenterLoss: A Discriminative Feature Learning Approach | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://yoursite.com/archives/index.html">
+  <meta name="description" content="原文：https://www.aiuai.cn/aifarm102.html  题目: CenterLoss - A Discriminative Feature Learning Approach for Deep Face Recognition作者: Yandong Wen, Kaipeng Zhang, Zhifeng Li and Yu Qiao团队: CAS, CUHKECCV2016">
+<meta name="keywords" content="ML,转载,CenterLoss">
+<meta property="og:type" content="article">
+<meta property="og:title" content="论文阅读 - CenterLoss: A Discriminative Feature Learning Approach">
+<meta property="og:url" content="http://yoursite.com/2019/04/01/CenterLoss-A-Discriminative-Feature-Learning-Approach/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="原文：https://www.aiuai.cn/aifarm102.html  题目: CenterLoss - A Discriminative Feature Learning Approach for Deep Face Recognition作者: Yandong Wen, Kaipeng Zhang, Zhifeng Li and Yu Qiao团队: CAS, CUHKECCV2016">
 <meta property="og:locale" content="default">
+<meta property="og:image" content="https://www.aiuai.cn/uploads/sina/5ce8de56a5069.jpg">
+<meta property="og:image" content="https://www.aiuai.cn/uploads/sina/5ce8de5728caa.jpg">
+<meta property="og:image" content="https://www.aiuai.cn/uploads/sina/5ce8de57b04ee.jpg">
+<meta property="og:image" content="https://www.aiuai.cn/uploads/sina/5ce8de5809be9.jpg">
+<meta property="og:image" content="https://www.aiuai.cn/uploads/sina/5ce8de584c331.jpg">
+<meta property="og:image" content="https://www.aiuai.cn/uploads/sina/5ce8de589e272.jpg">
+<meta property="og:image" content="https://www.aiuai.cn/uploads/sina/5ce8de58d60eb.jpg">
+<meta property="og:image" content="https://www.aiuai.cn/uploads/sina/5ce8de5992b02.jpg">
+<meta property="og:image" content="https://www.aiuai.cn/uploads/sina/5ce8de59da550.jpg">
+<meta property="og:image" content="https://www.aiuai.cn/uploads/sina/5ce8de5a5f346.jpg">
+<meta property="og:updated_time" content="2019-05-29T08:58:56.098Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo">
+<meta name="twitter:title" content="论文阅读 - CenterLoss: A Discriminative Feature Learning Approach">
+<meta name="twitter:description" content="原文：https://www.aiuai.cn/aifarm102.html  题目: CenterLoss - A Discriminative Feature Learning Approach for Deep Face Recognition作者: Yandong Wen, Kaipeng Zhang, Zhifeng Li and Yu Qiao团队: CAS, CUHKECCV2016">
+<meta name="twitter:image" content="https://www.aiuai.cn/uploads/sina/5ce8de56a5069.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -148,342 +164,151 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-CenterLoss-A-Discriminative-Feature-Learning-Approach" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/04/机器视觉/" class="archive-article-date">
-  	<time datetime="2019-04-04T03:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-04</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/04/机器视觉/">机器视觉（深度学习）</a>
+    <h1 class="article-title" itemprop="name">
+      论文阅读 - CenterLoss: A Discriminative Feature Learning Approach
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">机器视觉</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/03/一文概览主要语义分割网络./" class="archive-article-date">
-  	<time datetime="2019-04-03T02:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/03/一文概览主要语义分割网络./">一文概览主要语义分割网络：FCN,SegNet,U-Net...</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">转载/摘录</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">语义分割</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/03/softmax loss/" class="archive-article-date">
-  	<time datetime="2019-04-03T02:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/03/softmax loss/">softmax、cross entropy和softmax loss学习笔记</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">转载</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/03/center-loss及其mnist上的应用(center-loss代码实现)/" class="archive-article-date">
-  	<time datetime="2019-04-03T02:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/03/center-loss及其mnist上的应用(center-loss代码实现)/">center loss及其mnist上的应用(center loss代码实现)</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">转载</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">centerloss</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/03/领域研究/" class="archive-article-date">
-  	<time datetime="2019-04-03T02:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/03/领域研究/">如何做领域研究（针对机器学习）</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">学习方法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/03/cnn可视化/" class="archive-article-date">
-  	<time datetime="2019-04-03T02:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/03/cnn可视化/">cnn可视化</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">可视化</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">转载/摘录</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/01/python基础/" class="archive-article-date">
+        
+        <a href="/2019/04/01/CenterLoss-A-Discriminative-Feature-Learning-Approach/" class="archive-article-date">
   	<time datetime="2019-04-01T04:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-01</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/01/python基础/">python基础</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">锤子</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
+        
+		<!-- 添加代码 -->
     
+        <span class="archive-article-date">
+            阅读量 <span id="busuanzi_value_page_pv"></span>
+        </span>
     
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/01/CenterLoss-A-Discriminative-Feature-Learning-Approach/" class="archive-article-date">
-  	<time datetime="2019-04-01T04:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-01</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/01/CenterLoss-A-Discriminative-Feature-Learning-Approach/">论文阅读 - CenterLoss: A Discriminative Feature Learning Approach</a>
-    </h1>
-  
+      </header>
+    
+	
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>原文：<a href="https://www.aiuai.cn/aifarm102.html" target="_blank" rel="noopener">https://www.aiuai.cn/aifarm102.html</a></p>
+<blockquote>
+<p>题目: CenterLoss - A Discriminative Feature Learning Approach for Deep Face Recognition<br>作者: Yandong Wen, Kaipeng Zhang, Zhifeng Li and Yu Qiao<br>团队: CAS, CUHK<br><a href="http://www.eccv2016.org/files/posters/P-3B-20.pdf" target="_blank" rel="noopener">ECCV2016 poster</a></p>
+</blockquote>
+<p><a href="https://github.com/ydwen/caffe-face" target="_blank" rel="noopener">[Caffe-Code]</a></p>
+<h2 id="1-摘要："><a href="#1-摘要：" class="headerlink" title="1. 摘要："></a>1. 摘要：</h2><blockquote>
+<p>Center Loss For Face Recognition - 提高CNN学习的特征的判别能力.<br>Center Loss 通过学习每一类的深度特征的中心，同时惩罚深度特征与对应的类别中心的距离.<br>Softmax Loss + Center Loss，可以同时增加类间分散程度(inter-class dispension)与类内紧凑程度(intra-class compactness).</p>
+</blockquote>
+<p>由于CNNs模型采用SGD方法以 mini-batch 的方式进行优化，难以很好的反应深度新特征的全局分布. 且对于大规模训练集，也很难将所有的训练样本一次性的输入到每次迭代.</p>
+<p>contrastive loss 和 triplet loss 存在图像 pairs 和 triplets 构建的问题，训练样本的图像采样较为复杂.</p>
+<p>基于 CNN 网络的典型框架：<br><a href="https://www.aiuai.cn/uploads/sina/5ce8de56a5069.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de56a5069.jpg" alt="img"></a></p>
+<p>将人脸图片输入到 CNN 网络，进行特征学习以得到深度特征，包括可区分特征和判别特征，然后进行 label 预测.</p>
+<p>对于深度特征分布情况的分析：</p>
+<p>以 MNIST 数据集， 采用 LeNets 网络，Softmax Loss，提取最后一层网络输出的 2 维特征，并进行可视化.<br><a href="https://www.aiuai.cn/uploads/sina/5ce8de5728caa.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de5728caa.jpg" alt="img"></a><br>Figure 2. 深度学习特征分布的可视化. (a) 训练集 (b) 测试集.</p>
+<p>网络的最后一个全连接层相当于线性分类器，不同类的深度特征通过决策边界(decision boundaries)被区分.</p>
+<p>由 Figure 2 可知，</p>
+<ul>
+<li>基于 Softmax Loss 监督学习的深度特征是可区分的；</li>
+<li>由于特征显著的类内变化，深度特征的判别能力不够. 某些类内距离大于类间距离.</li>
+</ul>
+<h2 id="1-Softmax-Loss"><a href="#1-Softmax-Loss" class="headerlink" title="1. Softmax Loss"></a>1. Softmax Loss</h2><p><a href="https://www.aiuai.cn/uploads/sina/5ce8de57b04ee.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de57b04ee.jpg" alt="img"></a></p>
+<p>xi∈Rd - 属于第 yi 类的第 i 个深度特征；d - 特征维度；</p>
+<p>Wj∈Rd - 最后全连接层的权重 W∈Rd×n 的第 j 列；</p>
+<p>b∈Rn - bias 项；</p>
+<p>m - mini-batch 大小；</p>
+<p>n - 类别数.</p>
+<h2 id="2-Center-Loss"><a href="#2-Center-Loss" class="headerlink" title="2. Center Loss"></a>2. Center Loss</h2><p>提升深度特征的判别能力：</p>
+<p>最小化类内距离，同时保持不同类别特征的可区分性. [Intuitively, minimizing the intra-class variations while keeping the features of different classes separable is the key. ]</p>
+<p><a href="https://www.aiuai.cn/uploads/sina/5ce8de5809be9.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de5809be9.jpg" alt="img"></a></p>
+<p>cyi∈Rd - 深度特征的第 yi 个类别中心.</p>
+<p>理想情况下，cyi 随着深度特征的学习而进行更新. 也就是说，需要在每次迭代中将整个训练集都考虑在内，并对每一类的特征进行取平均. 但这是不可行，甚至不切实际的.</p>
+<p>这里进行两处必要的改进：<br>[1] - 对 mini-batch 内的训练样本进行更新，而不是对整个训练集的各类别中心进行更新；每次迭代过程中，只对对应类别的特征进行平均计算，(某些类别中心可能不进行更新.)<br>[2] - 为了避免少样本类别造成的较大干扰，采用一个因子 α 来控制类别中心的学习率.</p>
+<p>Lc 关于 xi 的梯度和 cyi 的更新计算为：<br><a href="https://www.aiuai.cn/uploads/sina/5ce8de584c331.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de584c331.jpg" alt="img"></a></p>
+<p>如果 <code>condition=True</code>, 即条件成立, 则 δ(condition)=1，否则, δ(condition)=0;<br>α∈[0,1].</p>
+<p>采用 Softmax Loss + Center Loss 来进行判别特征学习：<br><a href="https://www.aiuai.cn/uploads/sina/5ce8de589e272.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de589e272.jpg" alt="img"></a></p>
+<p>其中，λ 为控制两个损失函数的 balance 因子，如果 λ=0 ，即是 Softmax Loss.</p>
+<p>SGD 优化过程：<br><a href="https://www.aiuai.cn/uploads/sina/5ce8de58d60eb.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de58d60eb.jpg" alt="img"></a></p>
+<p>λ 对于特征分布的影响如图：<br><a href="https://www.aiuai.cn/uploads/sina/5ce8de5992b02.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de5992b02.jpg" alt="img"></a><br>Figure 3. 基于 Softmax Loss 和 Center Loss 联合监督所学习深度特征的分布情况. 不同颜色的点表示不同类别的特征. 不同的 λ值对应不同的深度特征分布(α=0.5). 白色的圆点(c0,c1,…,c9) 分别表示 10 类深度特征的类别中心.</p>
+<p>合适的 λ 值能够明显提高深度特征的判别能力. 而且，在一个较大范围内的 λ 值，特征均具有可区分性. 这对于人脸识别是很有帮助的.</p>
+<h2 id="3-Discussion"><a href="#3-Discussion" class="headerlink" title="3. Discussion"></a>3. Discussion</h2><h3 id="3-1-Softmax-Loss-Center-Loss-联合训练的必要性"><a href="#3-1-Softmax-Loss-Center-Loss-联合训练的必要性" class="headerlink" title="3.1. Softmax Loss + Center Loss 联合训练的必要性"></a>3.1. Softmax Loss + Center Loss 联合训练的必要性</h3><p>如果只采用 Softmax Loss，深度特征类内离散度较大.</p>
+<p>如果只采用 Center Loss，深度特征和类别中心将趋近于 0(此时，Center Loss 非常小.)</p>
+<p>单独的采用一个 Loss，难以达到判别性特征学习的目的. 因此，需要进行联合训练.<br><a href="https://www.aiuai.cn/uploads/sina/5ce8de59da550.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de59da550.jpg" alt="img"></a><br>Figure . (左) 基于 Softmax Loss 的特征； (右) 基于 Center Loss 的特征. Center Loss 是使得任意红色特征点之间的距离小于红色特征点与蓝色特征点之间的距离，以确保最好的不同特征类别的划分.</p>
+<h3 id="3-2-对比-ContrastIve-Loss-和-Triplet-Loss"><a href="#3-2-对比-ContrastIve-Loss-和-Triplet-Loss" class="headerlink" title="3.2 对比 ContrastIve Loss 和 Triplet Loss"></a>3.2 对比 ContrastIve Loss 和 Triplet Loss</h3><p>ContrastIve Loss 和 Triplet Loss 均是被用来提高深度特征的判别能力. 但是，基于大规模数据集时，需要面对庞大的样本对和样本 triplets 采样的问题.</p>
+<p>Center Loss 与 Softmax Loss 采用相同的训练数据格式，不需要复杂的训练样本重采样.</p>
+<p>因此，Center Loss 易于实现，效率更高；Center Loss 通过直接学习类间的紧凑度，更有利于判别性特征学习.</p>
+<h2 id="4-Center-Loss-for-Face-Recognition"><a href="#4-Center-Loss-for-Face-Recognition" class="headerlink" title="4. Center Loss for Face Recognition"></a>4. Center Loss for Face Recognition</h2><ul>
+<li><p>网络结构</p>
+<p><img src="https://www.aiuai.cn/uploads/sina/5ce8de5a5f346.jpg" alt="img"></p>
+<p>Figure 4. 人脸识别的 CNN 网络. 基于 Center Loss + Softmax Loss.</p>
+</li>
+</ul>
+<ul>
+<li><p>数据</p>
+<p>首先检测所有的人脸图片及对应的 landmarks. 采用 5 个landmarks(2 eyes, nose 和 mouth corners) 来进行相似度变换.</p>
+<p>如果训练图片的人脸和 landmarks 检测失败 ，则丢弃该图片；但如果是测试图片，则仍采用提供的 landmarks.</p>
+<p>人脸图片裁剪为 112×96 的 RGB 图片. 每个像素值减去 127.5 的均值(中心化)，并乘以 1/128=0.0078125 的尺度.</p>
+<ul>
+<li><p>数据集</p>
+<p>CASIAWebFace</p>
+</li>
+</ul>
+</li>
+</ul>
+<pre><code>CACD2000
 
-        <div class="article-info info-on-right">
-          
+Celebrity+
+</code></pre><ul>
+<li>数据增广 —— 水平翻转</li>
+</ul>
+<ul>
+<li>CNNs 网络设置</li>
+</ul>
+<p>  基于 Caffe</p>
+<ul>
+<li><p>models - batchsize = 256 / 2 GPUs（Titan X）<br>model A - Softmax Loss<br>model B - Softmax Loss + Contrastive Loss<br>model C - Softmax Loss + Center Loss</p>
+</li>
+<li><p>测试设置</p>
+<p>将第一个 FC 层的输出作为深度特征.</p>
+<p>提取每张图片和其翻转图片的特征，一起作为图像特征. 然后进行PCA 降维.</p>
+<p>计算降维后的两个特征间的 Cos 距离，得到最终的 Score.</p>
+</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>[1] - <a href="http://www.jianshu.com/p/773fbd0b2472" target="_blank" rel="noopener">Center Loss - A Discriminative Feature Learning Approach for Deep Face Recognition 论文理解</a></p>
+<p>[2] - <a href="http://blog.csdn.net/qq_14845119/article/details/53308996" target="_blank" rel="noopener">人脸识别之caffe-face</a></p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/img/weixinpay.png">
+                      <span class="reward-type">微信</span>
+                    </div>
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -503,110 +328,129 @@
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2019/04/01/CenterLoss-A-Discriminative-Feature-Learning-Approach/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/01/自编码网络/" class="archive-article-date">
-  	<time datetime="2019-04-01T04:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-01</time>
-</a>
+<nav id="article-nav">
+  
+    <a href="/2019/04/01/python基础/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          python基础
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/04/01/自编码网络/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">自编码</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/01/自编码网络/">自编码</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">转载</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">自编码</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-摘要："><span class="toc-number">1.</span> <span class="toc-text">1. 摘要：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Softmax-Loss"><span class="toc-number">2.</span> <span class="toc-text">1. Softmax Loss</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Center-Loss"><span class="toc-number">3.</span> <span class="toc-text">2. Center Loss</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Discussion"><span class="toc-number">4.</span> <span class="toc-text">3. Discussion</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-Softmax-Loss-Center-Loss-联合训练的必要性"><span class="toc-number">4.1.</span> <span class="toc-text">3.1. Softmax Loss + Center Loss 联合训练的必要性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-对比-ContrastIve-Loss-和-Triplet-Loss"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 对比 ContrastIve Loss 和 Triplet Loss</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-Center-Loss-for-Face-Recognition"><span class="toc-number">5.</span> <span class="toc-text">4. Center Loss for Face Recognition</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考"><span class="toc-number">6.</span> <span class="toc-text">参考</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
+ 
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/03/30/机器学习基础/" class="archive-article-date">
-  	<time datetime="2019-03-30T13:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-03-30</time>
-</a>
-        </div>
-    	 
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/03/30/机器学习基础/">机器学习基础</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">读书笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">《机器学习基础教程Simon·Rpgers》</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
   
 
-    
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="extend next" rel="next" href="/archives/page/2/">Next &raquo;</a>
-    </nav>
+  
+
   
 
 
@@ -632,8 +476,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

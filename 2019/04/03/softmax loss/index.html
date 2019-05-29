@@ -6,15 +6,29 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Archives | Hexo</title>
+  <title>softmax、cross entropy和softmax loss学习笔记 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://yoursite.com/archives/index.html">
+  <meta name="description" content="原文：https://www.cnblogs.com/smartwhite/p/8601477.html 之前做手写数字识别时，接触到softmax网络，知道其是全连接层，但没有搞清楚它的实现方式，今天学习Alexnet网络，又接触到了softmax，果断仔细研究研究，有了softmax，损失函数自然不可少。一起学习记录一下。 主要参考的博文：http://blog.csdn.net/u01438">
+<meta name="keywords" content="ML,转载">
+<meta property="og:type" content="article">
+<meta property="og:title" content="softmax、cross entropy和softmax loss学习笔记">
+<meta property="og:url" content="http://yoursite.com/2019/04/03/softmax loss/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="原文：https://www.cnblogs.com/smartwhite/p/8601477.html 之前做手写数字识别时，接触到softmax网络，知道其是全连接层，但没有搞清楚它的实现方式，今天学习Alexnet网络，又接触到了softmax，果断仔细研究研究，有了softmax，损失函数自然不可少。一起学习记录一下。 主要参考的博文：http://blog.csdn.net/u01438">
 <meta property="og:locale" content="default">
+<meta property="og:image" content="http://img.blog.csdn.net/20170817074125500?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxNDM4MDE2NQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319131132488-2029579429.png">
+<meta property="og:image" content="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319131608192-218075784.png">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=p_k+%3D+q_k">
+<meta property="og:image" content="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319132319617-1403627977.png">
+<meta property="og:image" content="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319132531953-849413621.png">
+<meta property="og:image" content="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319132319617-1403627977.png">
+<meta property="og:image" content="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319131608192-218075784.png">
+<meta property="og:updated_time" content="2019-05-29T09:01:06.087Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo">
+<meta name="twitter:title" content="softmax、cross entropy和softmax loss学习笔记">
+<meta name="twitter:description" content="原文：https://www.cnblogs.com/smartwhite/p/8601477.html 之前做手写数字识别时，接触到softmax网络，知道其是全连接层，但没有搞清楚它的实现方式，今天学习Alexnet网络，又接触到了softmax，果断仔细研究研究，有了softmax，损失函数自然不可少。一起学习记录一下。 主要参考的博文：http://blog.csdn.net/u01438">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20170817074125500?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxNDM4MDE2NQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
   
     <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -148,124 +162,94 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-softmax loss" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      softmax、cross entropy和softmax loss学习笔记
+    </h1>
+  
+
+        
+        <a href="/2019/04/03/softmax loss/" class="archive-article-date">
+  	<time datetime="2019-04-03T02:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-03</time>
+</a>
+        
+		<!-- 添加代码 -->
     
+        <span class="archive-article-date">
+            阅读量 <span id="busuanzi_value_page_pv"></span>
+        </span>
+    
+      </header>
+    
+	
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>原文：<a href="https://www.cnblogs.com/smartwhite/p/8601477.html" target="_blank" rel="noopener">https://www.cnblogs.com/smartwhite/p/8601477.html</a></p>
+<p>之前做手写数字识别时，接触到softmax网络，知道其是全连接层，但没有搞清楚它的实现方式，今天学习Alexnet网络，又接触到了softmax，果断仔细研究研究，有了softmax，损失函数自然不可少。一起学习记录一下。</p>
+<p>主要参考的博文：<a href="http://blog.csdn.net/u014380165/article/details/77284921" target="_blank" rel="noopener">http://blog.csdn.net/u014380165/article/details/77284921</a></p>
+<p>侵删！</p>
+<p><strong>先讲softmax。</strong></p>
+<p>softmax是一个全连接层，功能是将卷积神经网络计算后的多个神经元输出，映射到（0，1）区间，给出每种分类的概率情况。下面主要记录全连接层到损失层是如何计算的。</p>
+<p><img src="http://img.blog.csdn.net/20170817074125500?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxNDM4MDE2NQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="softmax工作图"></p>
+<p>图的等号左边为全连接，w为权值，x是全连接层的输入（卷积运算激活池化后的特征向量，不一定为N<em>1,可以为S</em>P，这里只不过为了便于理解计算，把向量拉直为SP<em>1，即N</em>1，N=SP）假设全连接层前面连接的是一个卷积层，这个卷积层的输出是100个特征（也就是我们常说的feature map的channel为100），每个特征的大小是4<em>4，那么在将这些特征输入给全连接层之前会将这些特征flat成N</em>1的向量（这个时候N就是100<em>4</em>4=1600）。再看W，W是T<em>N的矩阵，其中N是由输入决定的，T是有网络输出的类别决定的，比如输出为10个类，则T=10.W和x运算后得到一个T</em>1的向量，向量大小没有限制。下一步就是softmax，softmax作用是将T个输入映射为概率，刚才打比方说有10个类别，则每个输出值就是每种类别的概率，显然概率之和为。分母为所有情况之和，分子为各种单一情况运算。</p>
+<p>终于转化为概率了，那接下来为了衡量好坏，当然是选择误差函数了，因为是概率输入，当然理所当然使用交叉熵了，</p>
+<p><strong>Cross entropy</strong></p>
+<p>首先理一下熵的概念，现有关于样本集的2个概率分布p和q，其中p为真实分布，q非真实分布。按照真实分布p来衡量识别一个样本的所需要的编码长度的期望(即平均编码长度)为：</p>
+<p><strong><img src="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319131132488-2029579429.png" alt="img"></strong></p>
+<p>如果使用错误分布q来表示来自真实分布p的平均编码长度，则应该是：</p>
+<p><img src="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319131608192-218075784.png" alt="img"></p>
+<p>其中第一个期望为信息熵，反应的是香农信息量的期望，第二个为交叉熵。信息熵代表的是随机变量或整个系统的不确定性，熵越大，随机变量或系统的不确定性就越大</p>
+<p>交叉熵可在神经网络(机器学习)中作为损失函数，p表示真实标记的分布，q则为训练后的模型的预测标记分布，交叉熵损失函数可以衡量p与q的相似性。交叉熵作为损失函数还有一个好处是使用sigmoid函数在梯度下降时能避免均方误差损失函数学习速率降低的问题，因为学习速率可以被输出的误差所控制。</p>
+<p>交叉熵越低，这个策略就越好，最低的交叉熵也就是使用了真实分布所计算出来的信息熵，因为此时 <img src="https://www.zhihu.com/equation?tex=p_k+%3D+q_k" alt="p_k = q_k"> ，交叉熵 = 信息熵。这也是为什么在机器学习中的分类算法中，我们总是最小化交叉熵，因为交叉熵越低，就证明由算法所产生的策略最接近最优策略，也间接证明我们算法所算出的非真实分布越接近真实分布。</p>
+<p>链接：<a href="https://www.zhihu.com/question/41252833/answer/195901726" target="_blank" rel="noopener">https://www.zhihu.com/question/41252833/answer/195901726</a></p>
+<p>链接：<a href="https://www.zhihu.com/question/41252833/answer/108777563" target="_blank" rel="noopener">https://www.zhihu.com/question/41252833/answer/108777563</a></p>
+<p><strong>softmax的损失函数叫做softmax loss，其定义为：</strong></p>
+<p><strong><img src="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319132319617-1403627977.png" alt="img"></strong></p>
+<p>首先L是损失。Sj是softmax的输出向量S的第j个值，前面已经介绍过了，表示的是这个样本属于第j个类别的概率。yj前面有个求和符号，j的范围也是1到类别数T，因此y是一个1*T的向量，里面的T个值，而且只有1个值是1，其他T-1个值都是0。那么哪个位置的值是1呢？答案是真实标签对应的位置的那个值是1，其他都是0。所以结果为：</p>
+<p><img src="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319132531953-849413621.png" alt="img"></p>
+<p>j指向当前样本的真是标签。假设一个5分类问题，然后一个样本I的标签y=[0,0,0,1,0]，也就是说样本I的真实标签是4，假设模型预测的结果概率（softmax的输出）p=[0.2,0.3,0.4,0.6,0.5]，可以看出这个预测是对的，那么对应的损失L=-log(0.6)，也就是当这个样本经过这样的网络参数产生这样的预测p时，它的损失是-log(0.6)。那么假设p=[0.2,0.3,0.4,0.1,0.5]，这个预测结果就很离谱了，因为真实标签是4，而你觉得这个样本是4的概率只有0.1（远不如其他概率高，如果是在测试阶段，那么模型就会预测该样本属于类别5），对应损失L=-log(0.1)。那么假设p=[0.2,0.3,0.4,0.3,0.5]，这个预测结果虽然也错了，但是没有前面那个那么离谱，对应的损失L=-log(0.3)。我们知道log函数在输入小于1的时候是个负数，而且log函数是递增函数，所以-log(0.6) &lt; -log(0.3) &lt; -log(0.1)。简单讲就是你预测错比预测对的损失要大，预测错得离谱比预测错得轻微的损失要大。</p>
+<p>这个过程也说明了softmax和max的区别。如我有两个数a和b，max选取ab中概率最大的那个数，没有第二种可能，但是对于b不公平啊，a的可能性比b大，但是不代表b不可能取不到，所以我想根据概率选取，概率大的多去，概率小的少取，这就是softmax。</p>
+<p><strong><img src="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319132319617-1403627977.png" alt="img">与<img src="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319131608192-218075784.png" alt="img"></strong></p>
+<p>可见其实是一样的。感谢以上博主和知乎作者分享，理清了我的思路，谢谢。纪录下，由新发现再补充，有错请指教，谢谢</p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/img/weixinpay.png">
+                      <span class="reward-type">微信</span>
+                    </div>
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/04/机器视觉/" class="archive-article-date">
-  	<time datetime="2019-04-04T03:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-04</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/04/机器视觉/">机器视觉（深度学习）</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">机器视觉</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/03/一文概览主要语义分割网络./" class="archive-article-date">
-  	<time datetime="2019-04-03T02:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/03/一文概览主要语义分割网络./">一文概览主要语义分割网络：FCN,SegNet,U-Net...</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">转载/摘录</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">语义分割</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/03/softmax loss/" class="archive-article-date">
-  	<time datetime="2019-04-03T02:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/03/softmax loss/">softmax、cross entropy和softmax loss学习笔记</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -281,332 +265,129 @@
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2019/04/03/softmax loss/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/03/center-loss及其mnist上的应用(center-loss代码实现)/" class="archive-article-date">
-  	<time datetime="2019-04-03T02:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-03</time>
-</a>
+<nav id="article-nav">
+  
+    <a href="/2019/04/03/一文概览主要语义分割网络./" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          一文概览主要语义分割网络：FCN,SegNet,U-Net...
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/04/03/center-loss及其mnist上的应用(center-loss代码实现)/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">center loss及其mnist上的应用(center loss代码实现)</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/03/center-loss及其mnist上的应用(center-loss代码实现)/">center loss及其mnist上的应用(center loss代码实现)</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">转载</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">centerloss</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    目录，不存在的…
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
+ 
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/03/领域研究/" class="archive-article-date">
-  	<time datetime="2019-04-03T02:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-03</time>
-</a>
-        </div>
-    	 
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/03/领域研究/">如何做领域研究（针对机器学习）</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">学习方法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/03/cnn可视化/" class="archive-article-date">
-  	<time datetime="2019-04-03T02:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/03/cnn可视化/">cnn可视化</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">可视化</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">转载/摘录</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/01/python基础/" class="archive-article-date">
-  	<time datetime="2019-04-01T04:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-01</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/01/python基础/">python基础</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">锤子</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/01/CenterLoss-A-Discriminative-Feature-Learning-Approach/" class="archive-article-date">
-  	<time datetime="2019-04-01T04:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-01</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/01/CenterLoss-A-Discriminative-Feature-Learning-Approach/">论文阅读 - CenterLoss: A Discriminative Feature Learning Approach</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">转载</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">CenterLoss</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/01/自编码网络/" class="archive-article-date">
-  	<time datetime="2019-04-01T04:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-01</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/01/自编码网络/">自编码</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">转载</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">自编码</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/03/30/机器学习基础/" class="archive-article-date">
-  	<time datetime="2019-03-30T13:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-03-30</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/03/30/机器学习基础/">机器学习基础</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">读书笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">《机器学习基础教程Simon·Rpgers》</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="extend next" rel="next" href="/archives/page/2/">Next &raquo;</a>
-    </nav>
   
 
 
@@ -632,8 +413,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
