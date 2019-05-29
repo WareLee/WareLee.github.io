@@ -24,7 +24,7 @@
 <meta property="og:image" content="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319132531953-849413621.png">
 <meta property="og:image" content="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319132319617-1403627977.png">
 <meta property="og:image" content="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319131608192-218075784.png">
-<meta property="og:updated_time" content="2019-05-29T09:01:06.087Z">
+<meta property="og:updated_time" content="2019-05-29T09:23:42.015Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="softmax、cross entropy和softmax loss学习笔记">
 <meta name="twitter:description" content="原文：https://www.cnblogs.com/smartwhite/p/8601477.html 之前做手写数字识别时，接触到softmax网络，知道其是全连接层，但没有搞清楚它的实现方式，今天学习Alexnet网络，又接触到了softmax，果断仔细研究研究，有了softmax，损失函数自然不可少。一起学习记录一下。 主要参考的博文：http://blog.csdn.net/u01438">
@@ -192,7 +192,7 @@
         <p>原文：<a href="https://www.cnblogs.com/smartwhite/p/8601477.html" target="_blank" rel="noopener">https://www.cnblogs.com/smartwhite/p/8601477.html</a></p>
 <p>之前做手写数字识别时，接触到softmax网络，知道其是全连接层，但没有搞清楚它的实现方式，今天学习Alexnet网络，又接触到了softmax，果断仔细研究研究，有了softmax，损失函数自然不可少。一起学习记录一下。</p>
 <p>主要参考的博文：<a href="http://blog.csdn.net/u014380165/article/details/77284921" target="_blank" rel="noopener">http://blog.csdn.net/u014380165/article/details/77284921</a></p>
-<p>侵删！</p>
+<a id="more"></a>
 <p><strong>先讲softmax。</strong></p>
 <p>softmax是一个全连接层，功能是将卷积神经网络计算后的多个神经元输出，映射到（0，1）区间，给出每种分类的概率情况。下面主要记录全连接层到损失层是如何计算的。</p>
 <p><img src="http://img.blog.csdn.net/20170817074125500?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxNDM4MDE2NQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="softmax工作图"></p>
@@ -329,18 +329,18 @@
   
 <nav id="article-nav">
   
-    <a href="/2019/04/03/一文概览主要语义分割网络./" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2019/04/03/cnn可视化/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          一文概览主要语义分割网络：FCN,SegNet,U-Net...
+          cnn可视化
         
       </div>
     </a>
   
   
-    <a href="/2019/04/03/center-loss及其mnist上的应用(center-loss代码实现)/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">center loss及其mnist上的应用(center loss代码实现)</div>
+    <a href="/2019/04/03/领域研究/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">如何做领域研究（针对机器学习）</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -495,22 +495,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">可视化</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">转载/摘录</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">python</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">锤子</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">Movies</a>
               </li>
              
@@ -531,7 +515,23 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">机器视觉</a>
+                <a href="javascript:void(0)" class="js-tag color4">可视化</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">转载/摘录</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">python</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">锤子</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">基础概念</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -539,7 +539,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">学习方法</a>
+                <a href="javascript:void(0)" class="js-tag color5">机器视觉</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -551,7 +551,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">基础概念</a>
+                <a href="javascript:void(0)" class="js-tag color5">学习方法</a>
               </li>
              
               <li class="article-tag-list-item">

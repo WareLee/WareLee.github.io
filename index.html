@@ -174,6 +174,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <p>机器视觉细分： 分类，检测，分割，检索，识别(指纹，人脸，声纹，REID，行为</p>
+<p>TODO … …</p>
 
       
 
@@ -258,145 +259,9 @@
 <p>图像的语义分割是将输入图像中的每个像素分配一个语义类别，以得到像素化的密集分类。虽然自 2007 年以来，语义分割/场景解析一直是计算机视觉社区的一部分，但与计算机视觉中的其他领域很相似，自 2014 年 Long 等人首次使用全卷积神经网络对自然图像进行端到端分割，语义分割才有了重大突破。</p>
 <p><img src="https://img-blog.csdn.net/20180605160916778" alt="img"></p>
 <p>图1：输入图像（左），FCN-8s 网络生成的语义分割图（右）（使用 pytorch-semseg 训练）</p>
-<p>FCN-8s 架构在 Pascal VOC 2012 数据集上的性能相比以前的方法提升了 20%，达到了 62.2% 的 mIOU。这种架构是语义分割的基础，此后一些新的和更好的体系结构都基于此。</p>
-<p>全卷积网络（FCNs）可以用于自然图像的语义分割、多模态医学图像分析和多光谱卫星图像分割。与 AlexNet、VGG、ResNet 等深度分类网络类似，FCNs 也有大量进行语义分割的深层架构。</p>
-<p>本文作者总结了 FCN、SegNet、U-Net、FC-Densenet E-Net 和 Link-Net、RefineNet、PSPNet、Mask-RCNN 以及一些半监督方法，例如 DecoupledNet 和 GAN-SS，并为其中的一些网络提供了 PyTorch 实现。在文章的最后一部分，作者总结了一些流行的数据集，并展示了一些网络训练的结果。</p>
-<p><strong>▌网络架构</strong></p>
-<p>一般的语义分割架构可以被认为是一个编码器——解码器网络。编码器通常是一个预训练的分类网络，像 VGG、ResNet，然后是一个解码器网络。这些架构之间的不同主要在于解码器网络。解码器的任务是将编码器学习到的可判别特征（较低分辨率）从语义上映射到像素空间（较高分辨率），以获得密集分类。</p>
-<p>不同于分类任务中深度网络的最终结果（即类存在的概率）被视为唯一重要的事，语义分割不仅需要在像素级有判别能力，还需要有能将编码器在不同阶段学到的可判别特征映射到像素空间的机制。不同的架构采用不同的机制（跳远连接、金字塔池化等）作为解码机制的一部分。</p>
-<p>一些上述架构和加载数据的代码可在以下链接获得：</p>
-<p><strong>Pytorch：<a href="https://github.com/meetshah1995/pytorch-semseg" target="_blank" rel="noopener">https://github.com/meetshah1995/pytorch-semseg</a></strong></p>
-<p>这篇论文对语义分割（包括 Recurrent Style Networks）作了一个更正式的总结。</p>
-<p><strong>▌Fully Convolution Networks (FCNs) 全卷积网络</strong></p>
-<p>我们将当前分类网络（AlexNet, VGG net 和 GoogLeNet）修改为全卷积网络，通过对分割任务进行微调，将它们学习的表征转移到网络中。然后，我们定义了一种新架构，它将深的、粗糙的网络层语义信息和浅的、精细的网络层的表层信息结合起来，来生成精确的分割。我们的全卷积网络在 PASCAL VOC（在 2012 年相对以前有 20% 的提升，达到了62.2% 的平均 IU），NYUDv2 和 SIFT Flow 上实现了最优的分割结果，对于一个典型的图像，推断只需要三分之一秒的时间。</p>
-<p><img src="https://img-blog.csdn.net/20180605160931339" alt="img"></p>
-<p>图2：FCN 端到端密集预测流程</p>
-<p><strong>关键特点：</strong></p>
-<p>特征是由编码器中的不同阶段合并而成的，它们在语义信息的粗糙程度上有所不同。</p>
-<p>低分辨率语义特征图的上采样使用通过双线性插值滤波器初始化的反卷积操作完成。</p>
-<p>从 VGG16、Alexnet 等现代分类器网络进行知识转移的优秀样本来实现语义细分。</p>
-<p><img src="https://img-blog.csdn.net/20180605160940628" alt="img"></p>
-<p>图3：将全连接层转换成卷积层，使得分类网络可以输出一个类的热图。</p>
-<p>如上图所示，像 VGG16 分类网络的全连接层（fc6，fc7）被转换为全卷积层。它生成了一个低分辨率的类的热图，然后用双线性初始化的反卷积，并在上采样的每一个阶段通过融合（简单地相加）VGG16 中的低层（conv4和conv3）的更加粗糙但是分辨率更高的特征图进一步细化特征。在这里可以找到更加详细的 netscope 风格的网络可视化。</p>
-<p>在传统的分类 CNNs 中，池化操作用来增加视野，同时减少特征图的分辨率。这对于分类任务来说非常有用，因为分类的最终目标是找到某个特定类的存在，而对象的空间位置无关紧要。因此，在每个卷积块之后引入池化操作，以使后续块能够从已池化的特征中提取更多抽象、突出类的特征。</p>
-<p><img src="https://img-blog.csdn.net/20180605160950776" alt="img"></p>
-<p>图4：FCN-8s 网络架构</p>
-<p>另一方面，池化和带步长的卷积对语义分割是不利的，因为这些操作造成了空间信息的丢失。下面列出的大多数架构主要在解码器中使用了不同的机制，但目的都在于恢复在编码器中降低分辨率时丢失的信息。如上图所示，FCN-8s 融合了不同粗糙度（conv3、conv4和fc7）的特征，利用编码器不同阶段不同分辨率的空间信息来细化分割结果。</p>
-<p><img src="https://img-blog.csdn.net/20180605160958469" alt="img"></p>
-<p>图5：训练 FCNs 时卷积层的梯度</p>
-<p>第一个卷积层捕捉低层次的几何信息，因为这完全依赖数据集，你可以注意到梯度调整了第一层的权重以使模型适应数据集。VGG 中更深层的卷积层有非常小的梯度流，因为这里捕获的高层次的语义概念足够用于分割。</p>
-<p><img src="https://img-blog.csdn.net/20180605161051797" alt="img"></p>
-<p>图6：反卷积（卷积转置）&amp; 空洞卷积</p>
-<p>语义分割架构的另一个重要方面是，对特征图使用反卷积，将低分辨率分割图上采样至输入图像分辨率机制，或者花费大量计算成本，使用空洞卷积在编码器上部分避免分辨率下降。即使在现代 GPUs 上，空洞卷积的计算成本也很高。</p>
-<p>论文链接：<a href="https://arxiv.org/abs/1411.4038" target="_blank" rel="noopener">https://arxiv.org/abs/1411.4038</a></p>
-<p>▌<strong>SegNet</strong></p>
-<p>SegNet 的新颖之处在于解码器对其较低分辨率的输入特征图进行上采样的方式。具体地说，解码器使用了在相应编码器的最大池化步骤中计算的池化索引来执行非线性上采样。这种方法消除了学习上采样的需要。经上采样后的特征图是稀疏的，因此随后使用可训练的卷积核进行卷积操作，生成密集的特征图。我们提出的架构与广泛采用的 FCN 以及众所周知的 DeepLab-LargeFOV，DeconvNet 架构进行比较。比较的结果揭示了在实现良好的分割性能时所涉及的内存与精度之间的权衡。</p>
-<p><img src="https://img-blog.csdn.net/20180605161144761" alt="img"></p>
-<p>图7：SegNet 架构</p>
-<p><strong>关键特点：</strong></p>
-<p>SegNet 在解码器中使用去池化对特征图进行上采样，并在分割中保持高频细节的完整性。</p>
-<p>编码器不使用全连接层（和 FCN 一样进行卷积），因此是拥有较少参数的轻量级网络。</p>
-<p><img src="https://img-blog.csdn.net/20180605161152557" alt="img"></p>
-<p>图8：去池化</p>
-<p>如上图所示，编码器中的每一个最大池化层的索引都存储了起来，用于之后在解码器中使用那些存储的索引来对相应特征图进行去池化操作。这有助于保持高频信息的完整性，但当对低分辨率的特征图进行去池化时，它也会忽略邻近的信息。</p>
-<p>论文链接：<a href="https://arxiv.org/abs/1511.00561" target="_blank" rel="noopener">https://arxiv.org/abs/1511.00561</a></p>
-<p>▌<strong>U-Net</strong></p>
-<p>U-Net 架构包括一个捕获上下文信息的收缩路径和一个支持精确本地化的对称扩展路径。我们证明了这样一个网络可以使用非常少的图像进行端到端的训练，并且在 ISBI 神经元结构分割挑战赛中取得了比以前最好的方法（一个滑动窗口的卷积网络）更加优异的性能。我们使用相同的网络，在透射光显微镜图像（相位对比度和 DIC）上进行训练，以很大的优势获得了 2015 年 ISBI 细胞追踪挑战赛。此外，网络推断速度很快。一个 512x512 的图像分割在最新的 GPU 上花费了不到一秒。</p>
-<p><img src="https://img-blog.csdn.net/20180605161211422" alt="img"></p>
-<p>图9：U-Net 架构</p>
-<p><strong>关键特点：</strong></p>
-<p>U-Net 简单地将编码器的特征图拼接至每个阶段解码器的上采样特征图，从而形成一个梯形结构。该网络非常类似于 Ladder Network 类型的架构。</p>
-<p>通过跳远拼接连接的架构，在每个阶段都允许解码器学习在编码器池化中丢失的相关特性。</p>
-<p>U-Net 在 EM 数据集上取得了最优异的结果，该数据集只有 30 个密集标注的医学图像和其他医学图像数据集，U-Net 后来扩展到 3D 版的 3D-U-Net。虽然 U-Net 的发表是因为在生物医学领域的分割、网络实用性以及从非常少的数据中学习的能力，但现在已经成功应用在其他几个领域，例如卫星图像分割，同时也成为许多 kaggle 竞赛中关于医学图像分割获胜的解决方案中的一部分。</p>
-<p>论文链接：<a href="https://arxiv.org/abs/1505.04597" target="_blank" rel="noopener">https://arxiv.org/abs/1505.04597</a></p>
-<p>▌<strong>Fully Convolutional DenseNet</strong></p>
-<p>在文中我们扩充了 DenseNets，以解决语义分割的问题。我们在城市场景基准数据集（如 CamVid 和 Gatech ）上获得了最优异的结果，没有使用进一步的后处理模块和预训练模型。此外，由于模型的优异结构，我们的方法比当前发布的在这些数据集上取得最佳的网络参数要少得多。</p>
-<p><img src="https://img-blog.csdn.net/20180605161232865" alt="img"></p>
-<p>图10：全卷积 DenseNet 架构</p>
-<p>全卷积 DenseNet 使用 DenseNet 作为它的基础编码器，并且也以类似于 U-Net 的方式，在每一层级上将编码器和解码器进行拼接。</p>
-<p>论文链接：<a href="https://arxiv.org/abs/1611.09326" target="_blank" rel="noopener">https://arxiv.org/abs/1611.09326</a></p>
-<p>▌<strong>E-Net 和 Link-Net</strong></p>
-<p>在这篇文章中，我们提出了一种新的深度神经网络架构，称为 ENet（efficient neural network），专门为需要低延迟操作的任务创建。ENet 比当前网络模型快 18 倍，少了 75 倍的  FLOPs，参数数量降低了 79 倍，并且提供相似甚至更好的准确率。我们在 CamVid、Cityscapes 和 SUN 数据集上进行了测试，展示了与现有的最优方法进行比较的结果，以及网络准确率和处理时间之间的权衡。</p>
-<p>LinkNet 可以在 TX1 和 Titan X 上，分别以 2fps 和 19fps 的速率处理分辨率为 1280x720 的图像。</p>
-<p><img src="https://img-blog.csdn.net/20180605161247220" alt="img"></p>
-<p>图11：LinkNet 架构，</p>
-<p><img src="https://img-blog.csdn.net/2018060516132829" alt="img"></p>
-<p>LinkNet 中使用的编码器和解码器模块</p>
-<p>LinkNet 架构类似于一个梯形网络架构，编码器的特征图（横向）和解码器的上采样特征图（纵向）相加。还需要注意的是，由于它的通道约减方案（channel reduction scheme），解码器模块包含了相当少的参数。大小为 [H, W, n_channels] 的特征图先通过 1<em>1 卷积核得到大小为 [H, W, n_channels / 4] 的特征图，然后使用反卷积将其变为 [2</em>H, 2<em>W, n_channels / 4]，最后使用 1</em>1 卷积使其大小变为 [2<em>H, 2</em>W, n_channels / 2]，因此解码器有着更少的参数。这些网络在实现相当接近于最优准确率的同时，可以实时地在嵌入式 GPU 上进行分割。</p>
-<p>相关链接：<a href="https://arxiv.org/abs/1606.02147" target="_blank" rel="noopener">https://arxiv.org/abs/1606.02147</a>；<a href="https://codeac29.github.io/projects/linknet/" target="_blank" rel="noopener">https://codeac29.github.io/projects/linknet/</a></p>
-<p>▌<strong>Mask R-CNN</strong></p>
-<p>该方法被称为 Mask R-CNN，以 Faster R-CNN 为基础，在现有边界框识别分支基础上添加一个并行的预测目标掩码的分支。Mask R-CNN 很容易训练，仅仅在 Faster R-CNN 上增加了一点小开销，运行速度为 5fps。此外，Mask R-CNN 很容易泛化至其他任务。例如，可以使用相同的框架进行姿态估计。我们在 COCO 所有的挑战赛中都获得了最优结果，包括实例分割，边界框目标检测，和人关键点检测。在没有使用任何技巧的情况下，Mask R-CNN 在每项任务上都优于所有现有的单模型网络，包括 COCO 2016 挑战赛的获胜者。</p>
-<p><img src="https://img-blog.csdn.net/20180605161353371" alt="img"></p>
-<p>图12：Mask R-CNN 分割流程</p>
-<p><img src="https://img-blog.csdn.net/20180605161401995" alt="img"></p>
-<p>原始 Faster-RCNN 架构和辅助分割分支</p>
-<p>Mask R-CNN 架构相当简单，它是流行的 Faster R-CNN 架构的扩展，在其基础上进行必要的修改，以执行语义分割。</p>
-<p><strong>关键特点：</strong></p>
-<p>在 Faster R-CNN 上添加辅助分支以执行语义分割。</p>
-<p>对每个实例进行的 RoIPool 操作已经被修改为 RoIAlign ，它避免了特征提取的空间量化，因为在最高分辨率中保持空间特征不变对于语义分割很重要。</p>
-<p>Mask R-CNN 与 Feature Pyramid Networks（类似 于PSPNet，它对特征使用了金字塔池化）相结合，在 MS COCO 数据集上取得了最优结果。</p>
-<p>在 2017-06-01 的时候，在网络上还没有 Mask R-CNN 的工作实现，而且也没有在 Pascal VOC 上进行基准测试，但是它的分割掩码显示了它与真实标注非常接近。</p>
-<p>论文链接：<a href="https://arxiv.org/abs/1703.06870" target="_blank" rel="noopener">https://arxiv.org/abs/1703.06870</a></p>
-<p><strong>▌PSPNet</strong></p>
-<p>在文中我们利用基于不同区域的上下文信息集合，通过我们的金字塔池化模块，使用金字塔场景解析网络（PSPNet）来发挥全局上下文信息的能力。我们的全局先验表征在场景解析任务中产生了良好的质量结果，而 PSPNet 为像素级的预测提供了一个更好的框架，该方法在不同的数据集上达到了最优性能。它首次在 2016 ImageNet 场景解析挑战赛 PASCAL VOC 2012 基准和 Cityscapes 基准中出现。</p>
-<p><img src="https://img-blog.csdn.net/2018060516145784" alt="img"></p>
-<p>图13：PSPNet 架构</p>
-<p><img src="https://img-blog.csdn.net/20180605162110440" alt="img"></p>
-<p>使用 netscope 实现的可视化的空间金字塔池化</p>
-<p><strong>关键特点：</strong></p>
-<p>PSPNet 通过引入空洞卷积来修改基础的 ResNet 架构，特征经过最初的池化，在整个编码器网络中以相同的分辨率进行处理（原始图像输入的 1/4），直到它到达空间池化模块。</p>
-<p>在 ResNet 的中间层中引入辅助损失，以优化整体学习。</p>
-<p>在修改后的 ResNet 编码器顶部的空间金字塔池化聚合全局上下文。</p>
-<p><img src="https://img-blog.csdn.net/20180605162215661" alt="img"></p>
-<p>﻿﻿图 14：图片展示了全局空间上下文对语义分割的重要性。它显示了层之间感受野和大小的关系。在这个例子中，更大、更加可判别的感受野（蓝）相比于前一层（橙）可能在细化表征中更加重要，这有助于解决歧义。</p>
-<p>PSPNet 架构目前在 CityScapes、ADE20K 和 Pascal VOC 2012 中有最优结果。</p>
-<p>论文链接：<a href="https://arxiv.org/abs/1612.01105" target="_blank" rel="noopener">https://arxiv.org/abs/1612.01105</a></p>
-<p>▌<strong>RefineNet</strong></p>
-<p>在文中提出了 RefineNet，一个通用的多路径优化网络，它明确利用了整个下采样过程中可用的所有信息，使用远程残差连接实现高分辨率的预测。通过这种方式，可以使用早期卷积中的细粒度特征来直接细化捕捉高级语义特征的更深的网络层。RefineNet 的各个组件使用遵循恒等映射思想的残差连接，这允许网络进行有效的端到端训练。</p>
-<p><img src="https://img-blog.csdn.net/20180605162237488" alt="img"></p>
-<p>图15：RefineNet 架构</p>
-<p><img src="https://img-blog.csdn.net/20180605162245724" alt="img"></p>
-<p>建立 RefineNet 的块 - 残差卷积单元，多分辨率融合和链式残差池化</p>
-<p>RefineNet 解决了传统卷积网络中空间分辨率减少的问题，与 PSPNet（使用计算成本高的空洞卷积）使用的方法非常不同。提出的架构迭代地池化特征，利用特殊的 RefineNet 模块增加不同的分辨率，并最终生成高分辨率的分割图。</p>
-<p><strong>关键特点：</strong></p>
-<p>使用多分辨率作为输入，将提取的特征融合在一起，并将其传递到下一个阶段。</p>
-<p>引入链式残差池化，可以从一个大的图像区域获取背景信息。它通过多窗口尺寸有效地池化特性，利用残差连接和学习权重方式融合这些特征。</p>
-<p>所有的特征融合都是使用 sum（ResNet 方式）来进行端到端训练。</p>
-<p>使用普通 ResNet 的残差层，没有计算成本高的空洞卷积。</p>
-<p>论文链接：<a href="https://arxiv.org/abs/1611.06612" target="_blank" rel="noopener">https://arxiv.org/abs/1611.06612</a></p>
-<p>▌<strong>G-FRNet</strong></p>
-<p>在文中提出了 Gated Feedback Refinement Network (G-FRNet)，这是一种用于密集标记任务的端到端深度学习框架，解决了现有方法的局限性。最初，GFRNet 进行粗略地预测，然后通过在细化阶段有效地集成局部和全局上下文信息，逐步细化细节。我们引入了控制信息前向传递的门控单元，以过滤歧义。</p>
-<p><img src="https://img-blog.csdn.net/20180605162315583" alt="img"></p>
-<p>图16：G-FRNet 架构</p>
-<p><img src="https://img-blog.csdn.net/20180605162320865" alt="img"></p>
-<p>门控细化单元</p>
-<p>上述大多数架构都依赖于从编码器到解码器的简单特征，使用拼接、去池化或简单的加和。然而，在编码器中，从高分辨率（较难判别）层到对应的解码器中相应的上采样特征图的信息，不确定是否对分割有用。在每个阶段，通过使用门控细化反馈单元，控制从编码器传送到解码器的信息流，这样可以帮助解码器解决歧义，并形成更相关的门控空间上下文。 </p>
-<p>另一方面，本文的实验表明，在语义分割任务中，ResNet 是一个远优于 VGG16 的编码器。这是我在以前的论文中找不到的。</p>
-<p>论文链接：<a href="http://www.cs.umanitoba.ca/~ywang/papers/cvpr17.pdf" target="_blank" rel="noopener">http://www.cs.umanitoba.ca/~ywang/papers/cvpr17.pdf</a></p>
-<p>▌<strong>半监督语义分割</strong></p>
-<p><strong>DecoupledNet</strong></p>
-<p>与现有的将语义分割作为基于区域分类的单一任务的方法相反，我们的算法将分类和分割分离，并为每个任务学习一个单独的网络。在这个架构中，通过分类网络识别与图像相关的标签，然后在分割网络中对每个识别的标签执行二进制分割。它通过利用从桥接层获得的特定类的激活图来有效地减少用于分割的搜索空间。</p>
-<p><img src="https://img-blog.csdn.net/20180605162348318" alt="img"></p>
-<p>图17：DecoupledNet 架构</p>
-<p>这也许是第一个使用全卷积网络进行语义分割的半监督方法。</p>
-<p><strong>关键特点：</strong></p>
-<p>分离分类和分割任务，从而使预训练的分类网络能够即插即用（plug and play）。</p>
-<p>分类和分割网络之间的桥接层生成突出类的特征图（k 类），然后输入分割网络，生成一个二进制分割图（k 类）</p>
-<p>但是，这个方法在一张图像中分割 k 类需要传递 k 次。</p>
-<p>论文链接：<a href="https://arxiv.org/abs/1506.04924" target="_blank" rel="noopener">https://arxiv.org/abs/1506.04924</a></p>
-<p><strong>基于 GAN 的方法</strong></p>
-<p>基于生成对抗网络（GANs），我们提出了一种半监督框架，它包含一个生成器网络以提供用于多类别分类器的额外训练样本，以此作为 GAN 框架中的判别器，从 K 个可能的类中为样本分配一个标签 y 或者将其标记为一个假样本（额外的类）。为了确保 GANs 生成的图像质量更高，并改进像素分类，我们通过添加弱标注数据来扩展上述框架，即我们向生成器提供类级别的信息。</p>
-<p>论文链接：<a href="https://arxiv.org/abs/1703.09695" target="_blank" rel="noopener">https://arxiv.org/abs/1703.09695</a></p>
-<p><img src="https://img-blog.csdn.net/20180605162404146" alt="img"></p>
-<p>图18：弱监督（类级别标签） GAN</p>
-<p>﻿﻿<img src="https://img-blog.csdn.net/20180605162408812" alt="img"></p>
-<p>图19：半监督GAN</p>
-<p>▌<strong>数据集</strong></p>
-<p><img src="https://img-blog.csdn.net/20180605162431599" alt="img"></p>
-<p>▌<strong>结果</strong></p>
-<p><strong><img src="https://img-blog.csdn.net/20180605162504549" alt="img"></strong></p>
-<p>图20：FCN-8s 生成的样本语义分割图（使用 pytorch-semseg 训练）来自 Pascal VOC 验证集</p>
-
+        
+          <a class="article-more-a" href="/2019/04/03/一文概览主要语义分割网络./#more">more >></a>
+        
       
 
       
@@ -457,113 +322,6 @@
 
 
   
-    <article id="post-softmax loss" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/04/03/softmax loss/">softmax、cross entropy和softmax loss学习笔记</a>
-    </h1>
-  
-
-        
-        <a href="/2019/04/03/softmax loss/" class="archive-article-date">
-  	<time datetime="2019-04-03T02:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-03</time>
-</a>
-        
-		<!-- 添加代码 -->
-    
-      </header>
-    
-	
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>原文：<a href="https://www.cnblogs.com/smartwhite/p/8601477.html" target="_blank" rel="noopener">https://www.cnblogs.com/smartwhite/p/8601477.html</a></p>
-<p>之前做手写数字识别时，接触到softmax网络，知道其是全连接层，但没有搞清楚它的实现方式，今天学习Alexnet网络，又接触到了softmax，果断仔细研究研究，有了softmax，损失函数自然不可少。一起学习记录一下。</p>
-<p>主要参考的博文：<a href="http://blog.csdn.net/u014380165/article/details/77284921" target="_blank" rel="noopener">http://blog.csdn.net/u014380165/article/details/77284921</a></p>
-<p>侵删！</p>
-<p><strong>先讲softmax。</strong></p>
-<p>softmax是一个全连接层，功能是将卷积神经网络计算后的多个神经元输出，映射到（0，1）区间，给出每种分类的概率情况。下面主要记录全连接层到损失层是如何计算的。</p>
-<p><img src="http://img.blog.csdn.net/20170817074125500?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxNDM4MDE2NQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="softmax工作图"></p>
-<p>图的等号左边为全连接，w为权值，x是全连接层的输入（卷积运算激活池化后的特征向量，不一定为N<em>1,可以为S</em>P，这里只不过为了便于理解计算，把向量拉直为SP<em>1，即N</em>1，N=SP）假设全连接层前面连接的是一个卷积层，这个卷积层的输出是100个特征（也就是我们常说的feature map的channel为100），每个特征的大小是4<em>4，那么在将这些特征输入给全连接层之前会将这些特征flat成N</em>1的向量（这个时候N就是100<em>4</em>4=1600）。再看W，W是T<em>N的矩阵，其中N是由输入决定的，T是有网络输出的类别决定的，比如输出为10个类，则T=10.W和x运算后得到一个T</em>1的向量，向量大小没有限制。下一步就是softmax，softmax作用是将T个输入映射为概率，刚才打比方说有10个类别，则每个输出值就是每种类别的概率，显然概率之和为。分母为所有情况之和，分子为各种单一情况运算。</p>
-<p>终于转化为概率了，那接下来为了衡量好坏，当然是选择误差函数了，因为是概率输入，当然理所当然使用交叉熵了，</p>
-<p><strong>Cross entropy</strong></p>
-<p>首先理一下熵的概念，现有关于样本集的2个概率分布p和q，其中p为真实分布，q非真实分布。按照真实分布p来衡量识别一个样本的所需要的编码长度的期望(即平均编码长度)为：</p>
-<p><strong><img src="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319131132488-2029579429.png" alt="img"></strong></p>
-<p>如果使用错误分布q来表示来自真实分布p的平均编码长度，则应该是：</p>
-<p><img src="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319131608192-218075784.png" alt="img"></p>
-<p>其中第一个期望为信息熵，反应的是香农信息量的期望，第二个为交叉熵。信息熵代表的是随机变量或整个系统的不确定性，熵越大，随机变量或系统的不确定性就越大</p>
-<p>交叉熵可在神经网络(机器学习)中作为损失函数，p表示真实标记的分布，q则为训练后的模型的预测标记分布，交叉熵损失函数可以衡量p与q的相似性。交叉熵作为损失函数还有一个好处是使用sigmoid函数在梯度下降时能避免均方误差损失函数学习速率降低的问题，因为学习速率可以被输出的误差所控制。</p>
-<p>交叉熵越低，这个策略就越好，最低的交叉熵也就是使用了真实分布所计算出来的信息熵，因为此时 <img src="https://www.zhihu.com/equation?tex=p_k+%3D+q_k" alt="p_k = q_k"> ，交叉熵 = 信息熵。这也是为什么在机器学习中的分类算法中，我们总是最小化交叉熵，因为交叉熵越低，就证明由算法所产生的策略最接近最优策略，也间接证明我们算法所算出的非真实分布越接近真实分布。</p>
-<p>链接：<a href="https://www.zhihu.com/question/41252833/answer/195901726" target="_blank" rel="noopener">https://www.zhihu.com/question/41252833/answer/195901726</a></p>
-<p>链接：<a href="https://www.zhihu.com/question/41252833/answer/108777563" target="_blank" rel="noopener">https://www.zhihu.com/question/41252833/answer/108777563</a></p>
-<p><strong>softmax的损失函数叫做softmax loss，其定义为：</strong></p>
-<p><strong><img src="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319132319617-1403627977.png" alt="img"></strong></p>
-<p>首先L是损失。Sj是softmax的输出向量S的第j个值，前面已经介绍过了，表示的是这个样本属于第j个类别的概率。yj前面有个求和符号，j的范围也是1到类别数T，因此y是一个1*T的向量，里面的T个值，而且只有1个值是1，其他T-1个值都是0。那么哪个位置的值是1呢？答案是真实标签对应的位置的那个值是1，其他都是0。所以结果为：</p>
-<p><img src="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319132531953-849413621.png" alt="img"></p>
-<p>j指向当前样本的真是标签。假设一个5分类问题，然后一个样本I的标签y=[0,0,0,1,0]，也就是说样本I的真实标签是4，假设模型预测的结果概率（softmax的输出）p=[0.2,0.3,0.4,0.6,0.5]，可以看出这个预测是对的，那么对应的损失L=-log(0.6)，也就是当这个样本经过这样的网络参数产生这样的预测p时，它的损失是-log(0.6)。那么假设p=[0.2,0.3,0.4,0.1,0.5]，这个预测结果就很离谱了，因为真实标签是4，而你觉得这个样本是4的概率只有0.1（远不如其他概率高，如果是在测试阶段，那么模型就会预测该样本属于类别5），对应损失L=-log(0.1)。那么假设p=[0.2,0.3,0.4,0.3,0.5]，这个预测结果虽然也错了，但是没有前面那个那么离谱，对应的损失L=-log(0.3)。我们知道log函数在输入小于1的时候是个负数，而且log函数是递增函数，所以-log(0.6) &lt; -log(0.3) &lt; -log(0.1)。简单讲就是你预测错比预测对的损失要大，预测错得离谱比预测错得轻微的损失要大。</p>
-<p>这个过程也说明了softmax和max的区别。如我有两个数a和b，max选取ab中概率最大的那个数，没有第二种可能，但是对于b不公平啊，a的可能性比b大，但是不代表b不可能取不到，所以我想根据概率选取，概率大的多去，概率小的少取，这就是softmax。</p>
-<p><strong><img src="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319132319617-1403627977.png" alt="img">与<img src="https://images2018.cnblogs.com/blog/1228456/201803/1228456-20180319131608192-218075784.png" alt="img"></strong></p>
-<p>可见其实是一样的。感谢以上博主和知乎作者分享，理清了我的思路，谢谢。纪录下，由新发现再补充，有错请指教，谢谢</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">转载</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/04/03/softmax loss/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
     <article id="post-center-loss及其mnist上的应用(center-loss代码实现)" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -589,22 +347,11 @@
       
         <p>原文： <a href="https://blog.csdn.net/u014365862/article/details/79184966" target="_blank" rel="noopener">https://blog.csdn.net/u014365862/article/details/79184966</a></p>
 <p>Center loss是ECCV2016中一篇论文《A Discriminative Feature Learning Approach for Deep Face Recognition》提出来的概念，主要思想就是在softmax loss基础上额外加入一个正则项，让网络中每一类样本的特征向量都能够尽量聚在一起，在mnist上的示意效果如下图所示，可以看到每一类样本都聚在类别中心的周围。直接看下图：</p>
+<p><img src="https://img-blog.csdn.net/20180128100518676?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxNDM2NTg2Mg==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="img"></p>
 <p>如果下面代码不收敛或者收敛慢，再试几次，与开始的初始化参数有关！</p>
-<p>下面是center loss的tensorflow实现：</p>
-<p>有ceter loss：mnist_with_center_loss.py</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding=utf-8</span></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">from</span> tensorflow.examples.tutorials.mnist <span class="keyword">import</span> input_data</span><br><span class="line"> </span><br><span class="line">slim = tf.contrib.slim</span><br><span class="line">os.environ[<span class="string">'CUDA_VISIBLE_DEVICES'</span>] = <span class="string">'0'</span></span><br><span class="line"> </span><br><span class="line">LAMBDA = <span class="number">0.5</span></span><br><span class="line">CENTER_LOSS_ALPHA = <span class="number">0.5</span></span><br><span class="line">NUM_CLASSES = <span class="number">10</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">with</span> tf.name_scope(<span class="string">'input'</span>):</span><br><span class="line">    input_images = tf.placeholder(tf.float32, shape=(<span class="literal">None</span>,<span class="number">28</span>,<span class="number">28</span>,<span class="number">1</span>), name=<span class="string">'input_images'</span>)</span><br><span class="line">    labels = tf.placeholder(tf.int64, shape=(<span class="literal">None</span>), name=<span class="string">'labels'</span>)</span><br><span class="line">    </span><br><span class="line">global_step = tf.Variable(<span class="number">0</span>, trainable=<span class="literal">False</span>, name=<span class="string">'global_step'</span>)</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_center_loss</span><span class="params">(features, labels, alpha, num_classes)</span>:</span></span><br><span class="line">    <span class="string">"""获取center loss及center的更新op</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Arguments:</span></span><br><span class="line"><span class="string">        features: Tensor,表征样本特征,一般使用某个fc层的输出,shape应该为[batch_size, feature_length].</span></span><br><span class="line"><span class="string">        labels: Tensor,表征样本label,非one-hot编码,shape应为[batch_size].</span></span><br><span class="line"><span class="string">        alpha: 0-1之间的数字,控制样本类别中心的学习率,细节参考原文.</span></span><br><span class="line"><span class="string">        num_classes: 整数,表明总共有多少个类别,网络分类输出有多少个神经元这里就取多少.</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Return：</span></span><br><span class="line"><span class="string">        loss: Tensor,可与softmax loss相加作为总的loss进行优化.</span></span><br><span class="line"><span class="string">        centers: Tensor,存储样本中心值的Tensor，仅查看样本中心存储的具体数值时有用.</span></span><br><span class="line"><span class="string">        centers_update_op: op,用于更新样本中心的op，在训练时需要同时运行该op，否则样本中心不会更新</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="comment"># 获取特征的维数，例如256维</span></span><br><span class="line">    len_features = features.get_shape()[<span class="number">1</span>]</span><br><span class="line">    <span class="comment"># 建立一个Variable,shape为[num_classes, len_features]，用于存储整个网络的样本中心，</span></span><br><span class="line">    <span class="comment"># 设置trainable=False是因为样本中心不是由梯度进行更新的</span></span><br><span class="line">    centers = tf.get_variable(<span class="string">'centers'</span>, [num_classes, len_features], dtype=tf.float32,</span><br><span class="line">        initializer=tf.constant_initializer(<span class="number">0</span>), trainable=<span class="literal">False</span>)</span><br><span class="line">    <span class="comment"># 将label展开为一维的，输入如果已经是一维的，则该动作其实无必要</span></span><br><span class="line">    labels = tf.reshape(labels, [<span class="number">-1</span>])</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 根据样本label,获取mini-batch中每一个样本对应的中心值</span></span><br><span class="line">    centers_batch = tf.gather(centers, labels)</span><br><span class="line">    <span class="comment"># 计算loss</span></span><br><span class="line">    loss = tf.nn.l2_loss(features - centers_batch)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 当前mini-batch的特征值与它们对应的中心值之间的差</span></span><br><span class="line">    diff = centers_batch - features</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 获取mini-batch中同一类别样本出现的次数,了解原理请参考原文公式(4)</span></span><br><span class="line">    unique_label, unique_idx, unique_count = tf.unique_with_counts(labels)</span><br><span class="line">    appear_times = tf.gather(unique_count, unique_idx)</span><br><span class="line">    appear_times = tf.reshape(appear_times, [<span class="number">-1</span>, <span class="number">1</span>])</span><br><span class="line">    </span><br><span class="line">    diff = diff / tf.cast((<span class="number">1</span> + appear_times), tf.float32)</span><br><span class="line">    diff = alpha * diff</span><br><span class="line">    </span><br><span class="line">    centers_update_op = tf.scatter_sub(centers, labels, diff)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> loss, centers, centers_update_op</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">inference</span><span class="params">(input_images)</span>:</span></span><br><span class="line">    <span class="keyword">with</span> slim.arg_scope([slim.conv2d], weights_initializer=slim.variance_scaling_initializer(),</span><br><span class="line">        activation_fn=tf.nn.relu, normalizer_fn= slim.batch_norm, kernel_size=<span class="number">3</span>, padding=<span class="string">'SAME'</span>):</span><br><span class="line">        <span class="keyword">with</span> slim.arg_scope([slim.max_pool2d], kernel_size=<span class="number">2</span>):</span><br><span class="line">            </span><br><span class="line">            x = slim.conv2d(input_images, num_outputs=<span class="number">32</span>, scope=<span class="string">'conv1_1'</span>)</span><br><span class="line">            x = slim.conv2d(x, num_outputs=<span class="number">32</span>, scope=<span class="string">'conv1_2'</span>)</span><br><span class="line">            x = slim.max_pool2d(x, scope=<span class="string">'pool1'</span>)</span><br><span class="line">     </span><br><span class="line">            x = slim.conv2d(x, num_outputs=<span class="number">64</span>, scope=<span class="string">'conv2_1'</span>)</span><br><span class="line">            x = slim.conv2d(x, num_outputs=<span class="number">64</span>, scope=<span class="string">'conv2_2'</span>)</span><br><span class="line">            x = slim.max_pool2d(x, scope=<span class="string">'pool2'</span>)</span><br><span class="line">            </span><br><span class="line">            x = slim.conv2d(x, num_outputs=<span class="number">128</span>, scope=<span class="string">'conv3_1'</span>)</span><br><span class="line">            x = slim.conv2d(x, num_outputs=<span class="number">128</span>, scope=<span class="string">'conv3_2'</span>)</span><br><span class="line">            x = slim.max_pool2d(x, scope=<span class="string">'pool3'</span>)</span><br><span class="line">            </span><br><span class="line">            x = slim.flatten(x, scope=<span class="string">'flatten'</span>)</span><br><span class="line">            </span><br><span class="line">            feature = slim.fully_connected(x, num_outputs=<span class="number">2</span>, activation_fn=<span class="literal">None</span>, scope=<span class="string">'fc1'</span>)</span><br><span class="line">            </span><br><span class="line">            x = tf.nn.relu(feature)</span><br><span class="line"> </span><br><span class="line">            x = slim.fully_connected(x, num_outputs=<span class="number">10</span>, activation_fn=<span class="literal">None</span>, scope=<span class="string">'fc2'</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> x, feature</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build_network</span><span class="params">(input_images, labels, ratio=<span class="number">0.5</span>)</span>:</span></span><br><span class="line">    logits, features = inference(input_images)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">with</span> tf.name_scope(<span class="string">'loss'</span>):</span><br><span class="line">        <span class="keyword">with</span> tf.name_scope(<span class="string">'center_loss'</span>):</span><br><span class="line">            center_loss, centers, centers_update_op = get_center_loss(features, labels, CENTER_LOSS_ALPHA, NUM_CLASSES)</span><br><span class="line">        <span class="keyword">with</span> tf.name_scope(<span class="string">'softmax_loss'</span>):</span><br><span class="line">            softmax_loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits))</span><br><span class="line">        <span class="keyword">with</span> tf.name_scope(<span class="string">'total_loss'</span>):</span><br><span class="line">            total_loss = softmax_loss + ratio * center_loss</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">with</span> tf.name_scope(<span class="string">'acc'</span>):</span><br><span class="line">        accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.arg_max(logits, <span class="number">1</span>), labels), tf.float32))</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">with</span> tf.name_scope(<span class="string">'loss/'</span>):</span><br><span class="line">        tf.summary.scalar(<span class="string">'CenterLoss'</span>, center_loss)</span><br><span class="line">        tf.summary.scalar(<span class="string">'SoftmaxLoss'</span>, softmax_loss)</span><br><span class="line">        tf.summary.scalar(<span class="string">'TotalLoss'</span>, total_loss)</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">return</span> logits, features, total_loss, accuracy, centers_update_op</span><br><span class="line"> </span><br><span class="line">logits, features, total_loss, accuracy, centers_update_op = build_network(input_images, labels, ratio=LAMBDA)</span><br><span class="line"> </span><br><span class="line">mnist = input_data.read_data_sets(<span class="string">'/Users/liupeng/Desktop/anaconda/center_loss/tmp/mnist'</span>, reshape=<span class="literal">False</span>)</span><br><span class="line"> </span><br><span class="line">optimizer = tf.train.AdamOptimizer(<span class="number">0.001</span>)</span><br><span class="line">update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)</span><br><span class="line">update_ops.append(centers_update_op)</span><br><span class="line"><span class="keyword">with</span> tf.control_dependencies(update_ops):</span><br><span class="line">    train_op = optimizer.minimize(total_loss, global_step=global_step)</span><br><span class="line"> </span><br><span class="line">summary_op = tf.summary.merge_all()</span><br><span class="line">sess = tf.Session()</span><br><span class="line">sess.run(tf.global_variables_initializer())</span><br><span class="line">writer = tf.summary.FileWriter(<span class="string">'/Users/liupeng/Desktop/anaconda/center_loss/tmp/mnist_log'</span>, sess.graph)</span><br><span class="line"> </span><br><span class="line">mean_data = np.mean(mnist.train.images, axis=<span class="number">0</span>)</span><br><span class="line"> </span><br><span class="line">step = sess.run(global_step)</span><br><span class="line"><span class="keyword">while</span> step &lt;= <span class="number">80000</span>:</span><br><span class="line">    batch_images, batch_labels = mnist.train.next_batch(<span class="number">128</span>)</span><br><span class="line">    _, summary_str, train_acc = sess.run(</span><br><span class="line">        [train_op, summary_op, accuracy],</span><br><span class="line">        feed_dict=&#123;</span><br><span class="line">            input_images: batch_images - mean_data,</span><br><span class="line">            labels: batch_labels,</span><br><span class="line">        &#125;)</span><br><span class="line">    step += <span class="number">1</span></span><br><span class="line">    </span><br><span class="line">    writer.add_summary(summary_str, global_step=step)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> step % <span class="number">200</span> == <span class="number">0</span>:</span><br><span class="line">        vali_image = mnist.validation.images - mean_data</span><br><span class="line">        vali_acc = sess.run(</span><br><span class="line">            accuracy,</span><br><span class="line">            feed_dict=&#123;</span><br><span class="line">                input_images: vali_image,</span><br><span class="line">                labels: mnist.validation.labels</span><br><span class="line">            &#125;)</span><br><span class="line">        print((<span class="string">"step: &#123;&#125;, train_acc:&#123;:.4f&#125;, vali_acc:&#123;:.4f&#125;"</span>.</span><br><span class="line">              format(step, train_acc, vali_acc)))</span><br><span class="line"> </span><br><span class="line"><span class="comment"># 训练集</span></span><br><span class="line">feat = sess.run(features, feed_dict=&#123;input_images:mnist.train.images[:<span class="number">10000</span>]-mean_data&#125;)</span><br><span class="line"> </span><br><span class="line"><span class="comment"># %matplotlib inline</span></span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"> </span><br><span class="line">labels = mnist.train.labels[:<span class="number">10000</span>]</span><br><span class="line"> </span><br><span class="line">f = plt.figure(figsize=(<span class="number">16</span>,<span class="number">9</span>))</span><br><span class="line">c = [<span class="string">'#ff0000'</span>, <span class="string">'#ffff00'</span>, <span class="string">'#00ff00'</span>, <span class="string">'#00ffff'</span>, <span class="string">'#0000ff'</span>, </span><br><span class="line">     <span class="string">'#ff00ff'</span>, <span class="string">'#990000'</span>, <span class="string">'#999900'</span>, <span class="string">'#009900'</span>, <span class="string">'#009999'</span>]</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">    plt.plot(feat[labels==i,<span class="number">0</span>].flatten(), feat[labels==i,<span class="number">1</span>].flatten(), <span class="string">'.'</span>, c=c[i])</span><br><span class="line">plt.legend([<span class="string">'0'</span>, <span class="string">'1'</span>, <span class="string">'2'</span>, <span class="string">'3'</span>, <span class="string">'4'</span>, <span class="string">'5'</span>, <span class="string">'6'</span>, <span class="string">'7'</span>, <span class="string">'8'</span>, <span class="string">'9'</span>])</span><br><span class="line">plt.grid()</span><br><span class="line">plt.show()</span><br><span class="line"> </span><br><span class="line"><span class="comment"># 测试集</span></span><br><span class="line">feat = sess.run(features, feed_dict=&#123;input_images:mnist.test.images[:<span class="number">10000</span>]-mean_data&#125;)</span><br><span class="line"> </span><br><span class="line"><span class="comment"># %matplotlib inline</span></span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"> </span><br><span class="line">labels = mnist.test.labels[:<span class="number">10000</span>]</span><br><span class="line"> </span><br><span class="line">f = plt.figure(figsize=(<span class="number">16</span>,<span class="number">9</span>))</span><br><span class="line">c = [<span class="string">'#ff0000'</span>, <span class="string">'#ffff00'</span>, <span class="string">'#00ff00'</span>, <span class="string">'#00ffff'</span>, <span class="string">'#0000ff'</span>, </span><br><span class="line">     <span class="string">'#ff00ff'</span>, <span class="string">'#990000'</span>, <span class="string">'#999900'</span>, <span class="string">'#009900'</span>, <span class="string">'#009999'</span>]</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">    plt.plot(feat[labels==i,<span class="number">0</span>].flatten(), feat[labels==i,<span class="number">1</span>].flatten(), <span class="string">'.'</span>, c=c[i])</span><br><span class="line">plt.legend([<span class="string">'0'</span>, <span class="string">'1'</span>, <span class="string">'2'</span>, <span class="string">'3'</span>, <span class="string">'4'</span>, <span class="string">'5'</span>, <span class="string">'6'</span>, <span class="string">'7'</span>, <span class="string">'8'</span>, <span class="string">'9'</span>])</span><br><span class="line">plt.grid()</span><br><span class="line">plt.show()</span><br><span class="line"> </span><br><span class="line">sess.close()</span><br></pre></td></tr></table></figure>
-<p>分别看一下训练集和测试集的结果：</p>
-<p>训练集：<img src="https://img-blog.csdn.net/20180128111405143?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxNDM2NTg2Mg==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="img"><img src="https://blog.csdn.net/u014365862/article/details/79184966" alt="img">  测试集：<img src="https://img-blog.csdn.net/20180128111426497?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxNDM2NTg2Mg==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="img"></p>
-<p>tensorboard可视化</p>
-<p>tensorboard –logdir tmp/mnislog</p>
-<p><img src="https://img-blog.csdn.net/20180128111500829?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxNDM2NTg2Mg==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="img"></p>
-<p>对比看一下：没有ceter loss：mnist_without_center_loss.py</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># coding=utf-8</span></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">from</span> tensorflow.examples.tutorials.mnist <span class="keyword">import</span> input_data</span><br><span class="line"> </span><br><span class="line">slim = tf.contrib.slim</span><br><span class="line">os.environ[<span class="string">'CUDA_VISIBLE_DEVICES'</span>] = <span class="string">'0'</span></span><br><span class="line"> </span><br><span class="line">LAMBDA = <span class="number">0.5</span></span><br><span class="line">CENTER_LOSS_ALPHA = <span class="number">0.5</span></span><br><span class="line">NUM_CLASSES = <span class="number">10</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">with</span> tf.name_scope(<span class="string">'input'</span>):</span><br><span class="line">    input_images = tf.placeholder(tf.float32, shape=(<span class="literal">None</span>,<span class="number">28</span>,<span class="number">28</span>,<span class="number">1</span>), name=<span class="string">'input_images'</span>)</span><br><span class="line">    labels = tf.placeholder(tf.int64, shape=(<span class="literal">None</span>), name=<span class="string">'labels'</span>)</span><br><span class="line">    </span><br><span class="line">global_step = tf.Variable(<span class="number">0</span>, trainable=<span class="literal">False</span>, name=<span class="string">'global_step'</span>)</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_center_loss</span><span class="params">(features, labels, alpha, num_classes)</span>:</span></span><br><span class="line">    <span class="string">"""获取center loss及center的更新op</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Arguments:</span></span><br><span class="line"><span class="string">        features: Tensor,表征样本特征,一般使用某个fc层的输出,shape应该为[batch_size, feature_length].</span></span><br><span class="line"><span class="string">        labels: Tensor,表征样本label,非one-hot编码,shape应为[batch_size].</span></span><br><span class="line"><span class="string">        alpha: 0-1之间的数字,控制样本类别中心的学习率,细节参考原文.</span></span><br><span class="line"><span class="string">        num_classes: 整数,表明总共有多少个类别,网络分类输出有多少个神经元这里就取多少.</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Return：</span></span><br><span class="line"><span class="string">        loss: Tensor,可与softmax loss相加作为总的loss进行优化.</span></span><br><span class="line"><span class="string">        centers: Tensor,存储样本中心值的Tensor，仅查看样本中心存储的具体数值时有用.</span></span><br><span class="line"><span class="string">        centers_update_op: op,用于更新样本中心的op，在训练时需要同时运行该op，否则样本中心不会更新</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="comment"># 获取特征的维数，例如256维</span></span><br><span class="line">    len_features = features.get_shape()[<span class="number">1</span>]</span><br><span class="line">    <span class="comment"># 建立一个Variable,shape为[num_classes, len_features]，用于存储整个网络的样本中心，</span></span><br><span class="line">    <span class="comment"># 设置trainable=False是因为样本中心不是由梯度进行更新的</span></span><br><span class="line">    centers = tf.get_variable(<span class="string">'centers'</span>, [num_classes, len_features], dtype=tf.float32,</span><br><span class="line">        initializer=tf.constant_initializer(<span class="number">0</span>), trainable=<span class="literal">False</span>)</span><br><span class="line">    <span class="comment"># 将label展开为一维的，输入如果已经是一维的，则该动作其实无必要</span></span><br><span class="line">    labels = tf.reshape(labels, [<span class="number">-1</span>])</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 根据样本label,获取mini-batch中每一个样本对应的中心值</span></span><br><span class="line">    centers_batch = tf.gather(centers, labels)</span><br><span class="line">    <span class="comment"># 计算loss</span></span><br><span class="line">    loss = tf.nn.l2_loss(features - centers_batch)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 当前mini-batch的特征值与它们对应的中心值之间的差</span></span><br><span class="line">    diff = centers_batch - features</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 获取mini-batch中同一类别样本出现的次数,了解原理请参考原文公式(4)</span></span><br><span class="line">    unique_label, unique_idx, unique_count = tf.unique_with_counts(labels)</span><br><span class="line">    appear_times = tf.gather(unique_count, unique_idx)</span><br><span class="line">    appear_times = tf.reshape(appear_times, [<span class="number">-1</span>, <span class="number">1</span>])</span><br><span class="line">    </span><br><span class="line">    diff = diff / tf.cast((<span class="number">1</span> + appear_times), tf.float32)</span><br><span class="line">    diff = alpha * diff</span><br><span class="line">    </span><br><span class="line">    centers_update_op = tf.scatter_sub(centers, labels, diff)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> loss, centers, centers_update_op</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">inference</span><span class="params">(input_images)</span>:</span></span><br><span class="line">    <span class="keyword">with</span> slim.arg_scope([slim.conv2d], weights_initializer=slim.variance_scaling_initializer(),</span><br><span class="line">        activation_fn=tf.nn.relu, normalizer_fn= slim.batch_norm,kernel_size=<span class="number">3</span>, padding=<span class="string">'SAME'</span>):</span><br><span class="line">        <span class="keyword">with</span> slim.arg_scope([slim.max_pool2d], kernel_size=<span class="number">2</span>):</span><br><span class="line">            </span><br><span class="line">            x = slim.conv2d(input_images, num_outputs=<span class="number">32</span>, scope=<span class="string">'conv1_1'</span>)</span><br><span class="line">            x = slim.conv2d(x, num_outputs=<span class="number">32</span>, scope=<span class="string">'conv1_2'</span>)</span><br><span class="line">            x = slim.max_pool2d(x, scope=<span class="string">'pool1'</span>)</span><br><span class="line">     </span><br><span class="line">            x = slim.conv2d(x, num_outputs=<span class="number">64</span>, scope=<span class="string">'conv2_1'</span>)</span><br><span class="line">            x = slim.conv2d(x, num_outputs=<span class="number">64</span>, scope=<span class="string">'conv2_2'</span>)</span><br><span class="line">            x = slim.max_pool2d(x, scope=<span class="string">'pool2'</span>)</span><br><span class="line">            </span><br><span class="line">            x = slim.conv2d(x, num_outputs=<span class="number">128</span>, scope=<span class="string">'conv3_1'</span>)</span><br><span class="line">            x = slim.conv2d(x, num_outputs=<span class="number">128</span>, scope=<span class="string">'conv3_2'</span>)</span><br><span class="line">            x = slim.max_pool2d(x, scope=<span class="string">'pool3'</span>)</span><br><span class="line">            </span><br><span class="line">            x = slim.flatten(x, scope=<span class="string">'flatten'</span>)</span><br><span class="line">            </span><br><span class="line">            feature = slim.fully_connected(x, num_outputs=<span class="number">2</span>, activation_fn=<span class="literal">None</span>, scope=<span class="string">'fc1'</span>)</span><br><span class="line">            </span><br><span class="line">            x = tf.nn.relu(feature)</span><br><span class="line"> </span><br><span class="line">            x = slim.fully_connected(x, num_outputs=<span class="number">10</span>, activation_fn=<span class="literal">None</span>, scope=<span class="string">'fc2'</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> x, feature</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build_network</span><span class="params">(input_images, labels, ratio=<span class="number">0.5</span>)</span>:</span></span><br><span class="line">    logits, features = inference(input_images)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">with</span> tf.name_scope(<span class="string">'loss'</span>):</span><br><span class="line">        <span class="keyword">with</span> tf.name_scope(<span class="string">'center_loss'</span>):</span><br><span class="line">            center_loss, centers, centers_update_op = get_center_loss(features, labels, CENTER_LOSS_ALPHA, NUM_CLASSES)</span><br><span class="line">        <span class="keyword">with</span> tf.name_scope(<span class="string">'softmax_loss'</span>):</span><br><span class="line">            softmax_loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits))</span><br><span class="line">        <span class="keyword">with</span> tf.name_scope(<span class="string">'total_loss'</span>):</span><br><span class="line">            total_loss = softmax_loss  <span class="comment"># + ratio * center_loss</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">with</span> tf.name_scope(<span class="string">'acc'</span>):</span><br><span class="line">        accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.arg_max(logits, <span class="number">1</span>), labels), tf.float32))</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">with</span> tf.name_scope(<span class="string">'loss/'</span>):</span><br><span class="line">        tf.summary.scalar(<span class="string">'CenterLoss'</span>, center_loss)</span><br><span class="line">        tf.summary.scalar(<span class="string">'SoftmaxLoss'</span>, softmax_loss)</span><br><span class="line">        tf.summary.scalar(<span class="string">'TotalLoss'</span>, total_loss)</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">return</span> logits, features, total_loss, accuracy, centers_update_op</span><br><span class="line"> </span><br><span class="line">logits, features, total_loss, accuracy, centers_update_op = build_network(input_images, labels, ratio=LAMBDA)</span><br><span class="line"> </span><br><span class="line">mnist = input_data.read_data_sets(<span class="string">'/Users/liupeng/Desktop/anaconda/center_loss/tmp/mnist'</span>, reshape=<span class="literal">False</span>)</span><br><span class="line"> </span><br><span class="line">optimizer = tf.train.AdamOptimizer(<span class="number">0.001</span>)</span><br><span class="line">update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)</span><br><span class="line"><span class="comment"># update_ops.append(centers_update_op)</span></span><br><span class="line"><span class="keyword">with</span> tf.control_dependencies(update_ops):</span><br><span class="line">    train_op = optimizer.minimize(total_loss, global_step=global_step)</span><br><span class="line"> </span><br><span class="line">summary_op = tf.summary.merge_all()</span><br><span class="line">sess = tf.Session()</span><br><span class="line">sess.run(tf.global_variables_initializer())</span><br><span class="line">writer = tf.summary.FileWriter(<span class="string">'/Users/liupeng/Desktop/anaconda/center_loss/tmp/mnist_log'</span>, sess.graph)</span><br><span class="line"> </span><br><span class="line">mean_data = np.mean(mnist.train.images, axis=<span class="number">0</span>)</span><br><span class="line"> </span><br><span class="line">step = sess.run(global_step)</span><br><span class="line"><span class="keyword">while</span> step &lt;= <span class="number">80000</span>:</span><br><span class="line">    batch_images, batch_labels = mnist.train.next_batch(<span class="number">128</span>)</span><br><span class="line">    _, summary_str, train_acc = sess.run(</span><br><span class="line">        [train_op, summary_op, accuracy],</span><br><span class="line">        feed_dict=&#123;</span><br><span class="line">            input_images: batch_images - mean_data,</span><br><span class="line">            labels: batch_labels,</span><br><span class="line">        &#125;)</span><br><span class="line">    step += <span class="number">1</span></span><br><span class="line">    </span><br><span class="line">    writer.add_summary(summary_str, global_step=step)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> step % <span class="number">200</span> == <span class="number">0</span>:</span><br><span class="line">        vali_image = mnist.validation.images - mean_data</span><br><span class="line">        vali_acc = sess.run(</span><br><span class="line">            accuracy,</span><br><span class="line">            feed_dict=&#123;</span><br><span class="line">                input_images: vali_image,</span><br><span class="line">                labels: mnist.validation.labels</span><br><span class="line">            &#125;)</span><br><span class="line">        print((<span class="string">"step: &#123;&#125;, train_acc:&#123;:.4f&#125;, vali_acc:&#123;:.4f&#125;"</span>.</span><br><span class="line">              format(step, train_acc, vali_acc)))</span><br><span class="line"> </span><br><span class="line"><span class="comment"># 训练集</span></span><br><span class="line">feat = sess.run(features, feed_dict=&#123;input_images:mnist.train.images[:<span class="number">10000</span>]-mean_data&#125;)</span><br><span class="line"> </span><br><span class="line"><span class="comment"># %matplotlib inline</span></span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"> </span><br><span class="line">labels = mnist.train.labels[:<span class="number">10000</span>]</span><br><span class="line"> </span><br><span class="line">f = plt.figure(figsize=(<span class="number">16</span>,<span class="number">9</span>))</span><br><span class="line">c = [<span class="string">'#ff0000'</span>, <span class="string">'#ffff00'</span>, <span class="string">'#00ff00'</span>, <span class="string">'#00ffff'</span>, <span class="string">'#0000ff'</span>, </span><br><span class="line">     <span class="string">'#ff00ff'</span>, <span class="string">'#990000'</span>, <span class="string">'#999900'</span>, <span class="string">'#009900'</span>, <span class="string">'#009999'</span>]</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">    plt.plot(feat[labels==i,<span class="number">0</span>].flatten(), feat[labels==i,<span class="number">1</span>].flatten(), <span class="string">'.'</span>, c=c[i])</span><br><span class="line">plt.legend([<span class="string">'0'</span>, <span class="string">'1'</span>, <span class="string">'2'</span>, <span class="string">'3'</span>, <span class="string">'4'</span>, <span class="string">'5'</span>, <span class="string">'6'</span>, <span class="string">'7'</span>, <span class="string">'8'</span>, <span class="string">'9'</span>])</span><br><span class="line">plt.grid()</span><br><span class="line">plt.show()</span><br><span class="line"> </span><br><span class="line"><span class="comment"># 测试集</span></span><br><span class="line">feat = sess.run(features, feed_dict=&#123;input_images:mnist.test.images[:<span class="number">10000</span>]-mean_data&#125;)</span><br><span class="line"> </span><br><span class="line"><span class="comment">#%matplotlib inline</span></span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"> </span><br><span class="line">labels = mnist.test.labels[:<span class="number">10000</span>]</span><br><span class="line"> </span><br><span class="line">f = plt.figure(figsize=(<span class="number">16</span>,<span class="number">9</span>))</span><br><span class="line">c = [<span class="string">'#ff0000'</span>, <span class="string">'#ffff00'</span>, <span class="string">'#00ff00'</span>, <span class="string">'#00ffff'</span>, <span class="string">'#0000ff'</span>, </span><br><span class="line">     <span class="string">'#ff00ff'</span>, <span class="string">'#990000'</span>, <span class="string">'#999900'</span>, <span class="string">'#009900'</span>, <span class="string">'#009999'</span>]</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">    plt.plot(feat[labels==i,<span class="number">0</span>].flatten(), feat[labels==i,<span class="number">1</span>].flatten(), <span class="string">'.'</span>, c=c[i])</span><br><span class="line">plt.legend([<span class="string">'0'</span>, <span class="string">'1'</span>, <span class="string">'2'</span>, <span class="string">'3'</span>, <span class="string">'4'</span>, <span class="string">'5'</span>, <span class="string">'6'</span>, <span class="string">'7'</span>, <span class="string">'8'</span>, <span class="string">'9'</span>])</span><br><span class="line">plt.grid()</span><br><span class="line">plt.show()</span><br><span class="line"> </span><br><span class="line">sess.close()</span><br></pre></td></tr></table></figure>
-<p>分别看一下训练集和测试集的结果：</p>
-<p>训练集：<img src="https://img-blog.csdn.net/20180128111530976?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxNDM2NTg2Mg==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="img"><img src="https://blog.csdn.net/u014365862/article/details/79184966" alt="img"> 测试集：<img src="https://img-blog.csdn.net/20180128111557291?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxNDM2NTg2Mg==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="img"><img src="https://blog.csdn.net/u014365862/article/details/79184966" alt="img"></p>
-<p>另外看一下两个的训练结果比较：（左：有center loss；右：无center loss）</p>
-<p><img src="https://img-blog.csdn.net/20180128162707725?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvdTAxNDM2NTg2Mg==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="img"></p>
-
+        
+          <a class="article-more-a" href="/2019/04/03/center-loss及其mnist上的应用(center-loss代码实现)/#more">more >></a>
+        
       
 
       
@@ -636,92 +383,6 @@
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2019/04/03/center-loss及其mnist上的应用(center-loss代码实现)/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-领域研究" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/04/03/领域研究/">如何做领域研究（针对机器学习）</a>
-    </h1>
-  
-
-        
-        <a href="/2019/04/03/领域研究/" class="archive-article-date">
-  	<time datetime="2019-04-03T02:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-03</time>
-</a>
-        
-		<!-- 添加代码 -->
-    
-      </header>
-    
-	
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>打兔纸：</p>
-<p>这是一个关于本科生，研究生，博士生之间差异的形象小故事，忘记是从那个大牛那里看得的（ps.欢迎告知）。 话说有个老师让他的3个学生（本科生，研究生，博士生）背着枪要去森林里打兔子。他告诉本科生森林里有棵「生命之树」下有个兔子洞，你在洞口守着就行，等兔子露头，你就Duāng给它来一枪，所以本科生的任务就比较简单，枪打的好就能出色完成任务，这完全是一个技能训练，所以我们本科的时候就疯狂充实自己的技能树—“精通Java,Python，熟悉C++,JS,熟练使用SSH,数据结构算法了如指掌”，类似的语句是不是特别常见，O(∩_∩)O哈哈~。而对研究生，老师就只告诉他废弃的「桑纳岛」上有兔纸，去打就是了，因而研究生的第一任务就是找兔子洞，也就是要在特定的森林领域中发现存在的问题，然后解决之，所以我们一般会先大量广泛的阅读各种领域以及领域相关文献，大致了解相关的概念和知识点，然后选定具体细分领域，查阅相关综述性领域论文，以此作为发散原点去发现不足和问题。博士生可就没有这么多的照顾了，就听老师说了句去打兔子，并且两周后要汇报成果，故而，博士生要解决的首要问题是哪个森林里有兔纸，这是一个提出问题的过程，对博士生而言领域知识基本很熟悉了，要做的就是去指出整个专业还有哪些方向可以尝试甚至提出自己的假说。</p>
-</blockquote>
-        
-          <a class="article-more-a" href="/2019/04/03/领域研究/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">学习方法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/04/03/领域研究/">展开全文 >></a>
         </p>
       
 
@@ -809,6 +470,177 @@
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2019/04/03/cnn可视化/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-softmax loss" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/04/03/softmax loss/">softmax、cross entropy和softmax loss学习笔记</a>
+    </h1>
+  
+
+        
+        <a href="/2019/04/03/softmax loss/" class="archive-article-date">
+  	<time datetime="2019-04-03T02:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-03</time>
+</a>
+        
+		<!-- 添加代码 -->
+    
+      </header>
+    
+	
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>原文：<a href="https://www.cnblogs.com/smartwhite/p/8601477.html" target="_blank" rel="noopener">https://www.cnblogs.com/smartwhite/p/8601477.html</a></p>
+<p>之前做手写数字识别时，接触到softmax网络，知道其是全连接层，但没有搞清楚它的实现方式，今天学习Alexnet网络，又接触到了softmax，果断仔细研究研究，有了softmax，损失函数自然不可少。一起学习记录一下。</p>
+<p>主要参考的博文：<a href="http://blog.csdn.net/u014380165/article/details/77284921" target="_blank" rel="noopener">http://blog.csdn.net/u014380165/article/details/77284921</a></p>
+        
+          <a class="article-more-a" href="/2019/04/03/softmax loss/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">转载</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2019/04/03/softmax loss/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-领域研究" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/04/03/领域研究/">如何做领域研究（针对机器学习）</a>
+    </h1>
+  
+
+        
+        <a href="/2019/04/03/领域研究/" class="archive-article-date">
+  	<time datetime="2019-04-03T02:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-03</time>
+</a>
+        
+		<!-- 添加代码 -->
+    
+      </header>
+    
+	
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>打兔纸：</p>
+<p>这是一个关于本科生，研究生，博士生之间差异的形象小故事，忘记是从那个大牛那里看得的（ps.欢迎告知）。 话说有个老师让他的3个学生（本科生，研究生，博士生）背着枪要去森林里打兔子。他告诉本科生森林里有棵「生命之树」下有个兔子洞，你在洞口守着就行，等兔子露头，你就Duāng给它来一枪，所以本科生的任务就比较简单，枪打的好就能出色完成任务，这完全是一个技能训练，所以我们本科的时候就疯狂充实自己的技能树—“精通Java,Python，熟悉C++,JS,熟练使用SSH,数据结构算法了如指掌”，类似的语句是不是特别常见，O(∩_∩)O哈哈~。而对研究生，老师就只告诉他废弃的「桑纳岛」上有兔纸，去打就是了，因而研究生的第一任务就是找兔子洞，也就是要在特定的森林领域中发现存在的问题，然后解决之，所以我们一般会先大量广泛的阅读各种领域以及领域相关文献，大致了解相关的概念和知识点，然后选定具体细分领域，查阅相关综述性领域论文，以此作为发散原点去发现不足和问题。博士生可就没有这么多的照顾了，就听老师说了句去打兔子，并且两周后要汇报成果，故而，博士生要解决的首要问题是哪个森林里有兔纸，这是一个提出问题的过程，对博士生而言领域知识基本很熟悉了，要做的就是去指出整个专业还有哪些方向可以尝试甚至提出自己的假说。</p>
+</blockquote>
+        
+          <a class="article-more-a" href="/2019/04/03/领域研究/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">ML</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">学习方法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2019/04/03/领域研究/">展开全文 >></a>
         </p>
       
 
@@ -946,86 +778,9 @@
 <p>题目: CenterLoss - A Discriminative Feature Learning Approach for Deep Face Recognition<br>作者: Yandong Wen, Kaipeng Zhang, Zhifeng Li and Yu Qiao<br>团队: CAS, CUHK<br><a href="http://www.eccv2016.org/files/posters/P-3B-20.pdf" target="_blank" rel="noopener">ECCV2016 poster</a></p>
 </blockquote>
 <p><a href="https://github.com/ydwen/caffe-face" target="_blank" rel="noopener">[Caffe-Code]</a></p>
-<h2 id="1-摘要："><a href="#1-摘要：" class="headerlink" title="1. 摘要："></a>1. 摘要：</h2><blockquote>
-<p>Center Loss For Face Recognition - 提高CNN学习的特征的判别能力.<br>Center Loss 通过学习每一类的深度特征的中心，同时惩罚深度特征与对应的类别中心的距离.<br>Softmax Loss + Center Loss，可以同时增加类间分散程度(inter-class dispension)与类内紧凑程度(intra-class compactness).</p>
-</blockquote>
-<p>由于CNNs模型采用SGD方法以 mini-batch 的方式进行优化，难以很好的反应深度新特征的全局分布. 且对于大规模训练集，也很难将所有的训练样本一次性的输入到每次迭代.</p>
-<p>contrastive loss 和 triplet loss 存在图像 pairs 和 triplets 构建的问题，训练样本的图像采样较为复杂.</p>
-<p>基于 CNN 网络的典型框架：<br><a href="https://www.aiuai.cn/uploads/sina/5ce8de56a5069.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de56a5069.jpg" alt="img"></a></p>
-<p>将人脸图片输入到 CNN 网络，进行特征学习以得到深度特征，包括可区分特征和判别特征，然后进行 label 预测.</p>
-<p>对于深度特征分布情况的分析：</p>
-<p>以 MNIST 数据集， 采用 LeNets 网络，Softmax Loss，提取最后一层网络输出的 2 维特征，并进行可视化.<br><a href="https://www.aiuai.cn/uploads/sina/5ce8de5728caa.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de5728caa.jpg" alt="img"></a><br>Figure 2. 深度学习特征分布的可视化. (a) 训练集 (b) 测试集.</p>
-<p>网络的最后一个全连接层相当于线性分类器，不同类的深度特征通过决策边界(decision boundaries)被区分.</p>
-<p>由 Figure 2 可知，</p>
-<ul>
-<li>基于 Softmax Loss 监督学习的深度特征是可区分的；</li>
-<li>由于特征显著的类内变化，深度特征的判别能力不够. 某些类内距离大于类间距离.</li>
-</ul>
-<h2 id="1-Softmax-Loss"><a href="#1-Softmax-Loss" class="headerlink" title="1. Softmax Loss"></a>1. Softmax Loss</h2><p><a href="https://www.aiuai.cn/uploads/sina/5ce8de57b04ee.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de57b04ee.jpg" alt="img"></a></p>
-<p>xi∈Rd - 属于第 yi 类的第 i 个深度特征；d - 特征维度；</p>
-<p>Wj∈Rd - 最后全连接层的权重 W∈Rd×n 的第 j 列；</p>
-<p>b∈Rn - bias 项；</p>
-<p>m - mini-batch 大小；</p>
-<p>n - 类别数.</p>
-<h2 id="2-Center-Loss"><a href="#2-Center-Loss" class="headerlink" title="2. Center Loss"></a>2. Center Loss</h2><p>提升深度特征的判别能力：</p>
-<p>最小化类内距离，同时保持不同类别特征的可区分性. [Intuitively, minimizing the intra-class variations while keeping the features of different classes separable is the key. ]</p>
-<p><a href="https://www.aiuai.cn/uploads/sina/5ce8de5809be9.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de5809be9.jpg" alt="img"></a></p>
-<p>cyi∈Rd - 深度特征的第 yi 个类别中心.</p>
-<p>理想情况下，cyi 随着深度特征的学习而进行更新. 也就是说，需要在每次迭代中将整个训练集都考虑在内，并对每一类的特征进行取平均. 但这是不可行，甚至不切实际的.</p>
-<p>这里进行两处必要的改进：<br>[1] - 对 mini-batch 内的训练样本进行更新，而不是对整个训练集的各类别中心进行更新；每次迭代过程中，只对对应类别的特征进行平均计算，(某些类别中心可能不进行更新.)<br>[2] - 为了避免少样本类别造成的较大干扰，采用一个因子 α 来控制类别中心的学习率.</p>
-<p>Lc 关于 xi 的梯度和 cyi 的更新计算为：<br><a href="https://www.aiuai.cn/uploads/sina/5ce8de584c331.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de584c331.jpg" alt="img"></a></p>
-<p>如果 <code>condition=True</code>, 即条件成立, 则 δ(condition)=1，否则, δ(condition)=0;<br>α∈[0,1].</p>
-<p>采用 Softmax Loss + Center Loss 来进行判别特征学习：<br><a href="https://www.aiuai.cn/uploads/sina/5ce8de589e272.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de589e272.jpg" alt="img"></a></p>
-<p>其中，λ 为控制两个损失函数的 balance 因子，如果 λ=0 ，即是 Softmax Loss.</p>
-<p>SGD 优化过程：<br><a href="https://www.aiuai.cn/uploads/sina/5ce8de58d60eb.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de58d60eb.jpg" alt="img"></a></p>
-<p>λ 对于特征分布的影响如图：<br><a href="https://www.aiuai.cn/uploads/sina/5ce8de5992b02.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de5992b02.jpg" alt="img"></a><br>Figure 3. 基于 Softmax Loss 和 Center Loss 联合监督所学习深度特征的分布情况. 不同颜色的点表示不同类别的特征. 不同的 λ值对应不同的深度特征分布(α=0.5). 白色的圆点(c0,c1,…,c9) 分别表示 10 类深度特征的类别中心.</p>
-<p>合适的 λ 值能够明显提高深度特征的判别能力. 而且，在一个较大范围内的 λ 值，特征均具有可区分性. 这对于人脸识别是很有帮助的.</p>
-<h2 id="3-Discussion"><a href="#3-Discussion" class="headerlink" title="3. Discussion"></a>3. Discussion</h2><h3 id="3-1-Softmax-Loss-Center-Loss-联合训练的必要性"><a href="#3-1-Softmax-Loss-Center-Loss-联合训练的必要性" class="headerlink" title="3.1. Softmax Loss + Center Loss 联合训练的必要性"></a>3.1. Softmax Loss + Center Loss 联合训练的必要性</h3><p>如果只采用 Softmax Loss，深度特征类内离散度较大.</p>
-<p>如果只采用 Center Loss，深度特征和类别中心将趋近于 0(此时，Center Loss 非常小.)</p>
-<p>单独的采用一个 Loss，难以达到判别性特征学习的目的. 因此，需要进行联合训练.<br><a href="https://www.aiuai.cn/uploads/sina/5ce8de59da550.jpg" target="_blank" rel="noopener"><img src="https://www.aiuai.cn/uploads/sina/5ce8de59da550.jpg" alt="img"></a><br>Figure . (左) 基于 Softmax Loss 的特征； (右) 基于 Center Loss 的特征. Center Loss 是使得任意红色特征点之间的距离小于红色特征点与蓝色特征点之间的距离，以确保最好的不同特征类别的划分.</p>
-<h3 id="3-2-对比-ContrastIve-Loss-和-Triplet-Loss"><a href="#3-2-对比-ContrastIve-Loss-和-Triplet-Loss" class="headerlink" title="3.2 对比 ContrastIve Loss 和 Triplet Loss"></a>3.2 对比 ContrastIve Loss 和 Triplet Loss</h3><p>ContrastIve Loss 和 Triplet Loss 均是被用来提高深度特征的判别能力. 但是，基于大规模数据集时，需要面对庞大的样本对和样本 triplets 采样的问题.</p>
-<p>Center Loss 与 Softmax Loss 采用相同的训练数据格式，不需要复杂的训练样本重采样.</p>
-<p>因此，Center Loss 易于实现，效率更高；Center Loss 通过直接学习类间的紧凑度，更有利于判别性特征学习.</p>
-<h2 id="4-Center-Loss-for-Face-Recognition"><a href="#4-Center-Loss-for-Face-Recognition" class="headerlink" title="4. Center Loss for Face Recognition"></a>4. Center Loss for Face Recognition</h2><ul>
-<li><p>网络结构</p>
-<p><img src="https://www.aiuai.cn/uploads/sina/5ce8de5a5f346.jpg" alt="img"></p>
-<p>Figure 4. 人脸识别的 CNN 网络. 基于 Center Loss + Softmax Loss.</p>
-</li>
-</ul>
-<ul>
-<li><p>数据</p>
-<p>首先检测所有的人脸图片及对应的 landmarks. 采用 5 个landmarks(2 eyes, nose 和 mouth corners) 来进行相似度变换.</p>
-<p>如果训练图片的人脸和 landmarks 检测失败 ，则丢弃该图片；但如果是测试图片，则仍采用提供的 landmarks.</p>
-<p>人脸图片裁剪为 112×96 的 RGB 图片. 每个像素值减去 127.5 的均值(中心化)，并乘以 1/128=0.0078125 的尺度.</p>
-<ul>
-<li><p>数据集</p>
-<p>CASIAWebFace</p>
-</li>
-</ul>
-</li>
-</ul>
-<pre><code>CACD2000
-
-Celebrity+
-</code></pre><ul>
-<li>数据增广 —— 水平翻转</li>
-</ul>
-<ul>
-<li>CNNs 网络设置</li>
-</ul>
-<p>  基于 Caffe</p>
-<ul>
-<li><p>models - batchsize = 256 / 2 GPUs（Titan X）<br>model A - Softmax Loss<br>model B - Softmax Loss + Contrastive Loss<br>model C - Softmax Loss + Center Loss</p>
-</li>
-<li><p>测试设置</p>
-<p>将第一个 FC 层的输出作为深度特征.</p>
-<p>提取每张图片和其翻转图片的特征，一起作为图像特征. 然后进行PCA 降维.</p>
-<p>计算降维后的两个特征间的 Cos 距离，得到最终的 Score.</p>
-</li>
-</ul>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>[1] - <a href="http://www.jianshu.com/p/773fbd0b2472" target="_blank" rel="noopener">Center Loss - A Discriminative Feature Learning Approach for Deep Face Recognition 论文理解</a></p>
-<p>[2] - <a href="http://blog.csdn.net/qq_14845119/article/details/53308996" target="_blank" rel="noopener">人脸识别之caffe-face</a></p>
-
+        
+          <a class="article-more-a" href="/2019/04/01/CenterLoss-A-Discriminative-Feature-Learning-Approach/#more">more >></a>
+        
       
 
       
@@ -1196,21 +951,9 @@ Celebrity+
 <p>前言：</p>
 <p>《机器学习基础教程》 就是为计算机等信息类专业的学生理解最流行的机器学习算法提供核心数据知识和统计技术。改编自英国格拉斯哥大学计算机科学学院机器学习课程的讲义。</p>
 </blockquote>
-<h1 id="基础概念"><a href="#基础概念" class="headerlink" title="基础概念"></a>基础概念</h1><h2 id="随机变量和概率"><a href="#随机变量和概率" class="headerlink" title="随机变量和概率"></a>随机变量和概率</h2><ol>
-<li>概率</li>
-<li>概率分布</li>
-<li>条件概率</li>
-<li>联合概率 独立随机变量vs非独立随机变量</li>
-<li>方差 ： 度量随机变量如何变化，定义为实际值与期望值之差平方的期望值</li>
-<li>处理向量的时候方差的概念扩展为协方差矩阵</li>
-</ol>
-<h2 id="常见的离散（型概率）分布"><a href="#常见的离散（型概率）分布" class="headerlink" title="常见的离散（型概率）分布"></a>常见的离散（型概率）分布</h2><ol>
-<li>伯努利分布</li>
-<li>二项分布</li>
-<li>多项分布（针对向量的分布函数）</li>
-</ol>
-<p><img src="https://img-blog.csdn.net/20141125102611738?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3hyb29t/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt="img"></p>
-
+        
+          <a class="article-more-a" href="/2019/03/30/机器学习基础/#more">more >></a>
+        
       
 
       
@@ -1382,22 +1125,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">可视化</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">转载/摘录</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">python</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">锤子</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">Movies</a>
               </li>
              
@@ -1418,7 +1145,23 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">机器视觉</a>
+                <a href="javascript:void(0)" class="js-tag color4">可视化</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">转载/摘录</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">python</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">锤子</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">基础概念</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1426,7 +1169,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">学习方法</a>
+                <a href="javascript:void(0)" class="js-tag color5">机器视觉</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1438,7 +1181,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">基础概念</a>
+                <a href="javascript:void(0)" class="js-tag color5">学习方法</a>
               </li>
              
               <li class="article-tag-list-item">
